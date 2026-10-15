@@ -39,4 +39,6 @@ O projeto já está preparado com GitHub Actions para publicação automática c
 - **Progressive Web App (PWA)** com Service Worker e cache local.
 - **Funcionamento Offline:** grava e consulta todos os dados no armazenamento local (`localStorage`), sem depender de servidor.
 - **Leitor de Código de Barras (EAN/UPC):** suporte à câmera ao vivo e captura por foto em alta resolução com biblioteca ZXing.
+- **🏬 Cadastros de Supermercados Visitados:** gestão de redes, filiais, endereços, dias especiais de feiras/ofertas e acompanhamento de gastos e visitas por mercado.
+- **⚖️ Comparador de Produtos com Melhores Preços:** indicação visual de menores preços (`🏆 Melhor Preço`), cálculo automático de economia (em R$ e %), comparação equivalente por unidade base (R$/kg, R$/L, un), confronto direto entre 2 supermercados e ranking dos mais baratos.
 - **Backup e Exportação:** exportação em CSV para Excel e backup completo em formato JSON.

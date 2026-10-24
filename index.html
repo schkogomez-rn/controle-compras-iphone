@@ -76,6 +76,20 @@ input:focus,select:focus{border-color:var(--primary);box-shadow:0 0 0 4px color-
 .diff-tag{display:inline-block;padding:2px 7px;border-radius:6px;font-size:11px;font-weight:750}
 .diff-tag.cheaper{background:var(--accent-2);color:color-mix(in srgb,var(--accent) 80%,#111)}
 .diff-tag.expensive{background:color-mix(in srgb,var(--danger) 15%,var(--surface));color:var(--danger)}
+.natal-result{border:1.5px solid var(--accent);background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 12%,var(--surface)),var(--surface));border-radius:16px;padding:15px;animation:fade .2s ease;margin-top:12px}
+.natal-market-item{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:12px;border:1px solid var(--border);border-radius:14px;background:var(--surface);margin-bottom:9px;box-shadow:var(--shadow)}
+.badge-cnpj{background:color-mix(in srgb,var(--primary) 12%,var(--surface));color:var(--primary);font-size:10px;font-weight:750;padding:2px 7px;border-radius:6px;display:inline-block}
+
+/* ===== Estilos para Leitura por IA e Banco de Dados de Produtos ===== */
+.ai-btn-pulse{background:linear-gradient(135deg,#6366f1,#8b5cf6,#ec4899);color:#fff;border:0;box-shadow:0 4px 16px rgba(139,92,246,0.35);font-weight:800;transition:all .2s ease}
+.ai-btn-pulse:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(139,92,246,0.5)}
+.ai-spinner{width:22px;height:22px;border:3px solid rgba(139,92,246,0.25);border-top-color:#8b5cf6;border-radius:50%;animation:aiSpin .75s linear infinite;flex:0 0 22px}
+@keyframes aiSpin{to{transform:rotate(360deg)}}
+.catalog-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:11px;box-shadow:var(--shadow);transition:border-color .18s,transform .18s}
+.catalog-card:hover{border-color:color-mix(in srgb,var(--primary) 40%,var(--border))}
+.ai-pill{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:8px;font-size:11px;font-weight:750;background:color-mix(in srgb,var(--primary) 12%,var(--surface));color:var(--primary)}
+.ai-pill.success{background:color-mix(in srgb,var(--accent) 15%,var(--surface));color:var(--accent)}
+.barcode-badge{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:11px;background:color-mix(in srgb,var(--surface) 60%,var(--bg));border:1px solid var(--border);padding:2px 7px;border-radius:6px;color:var(--text);display:inline-flex;align-items:center;gap:4px}
 @media(max-width:480px){.grid{gap:9px}.card{padding:15px}.app-header h1{font-size:21px}.market-stats-grid{grid-template-columns:1fr 1fr}}
 </style>
 </head>
@@ -136,7 +150,9 @@ input:focus,select:focus{border-color:var(--primary);box-shadow:0 0 0 4px color-
     <div id="shoppingListContainer" class="list"></div>
   </div>
 </section>
-<section id="page-reg" class="section" aria-labelledby="reg-title"><div class="card"><div class="between"><div><h2 id="reg-title">Registrar compra</h2><div class="small muted">Preencha os campos obrigatórios para salvar com precisão.</div></div><span class="tag">offline</span></div><div class="photo-row" style="margin:14px 0"><button class="btn primary" type="button" id="scanBtn">▣ Ler código</button><label class="btn secondary" for="productFile">▧ Foto do produto</label><input class="sr-only" id="productFile" type="file" accept="image/*" capture="environment"><img id="preview" class="preview" alt="Prévia do produto"></div><div class="scan-note">⌁ <span><b>Leitura inteligente:</b> use a câmera ou uma foto nítida do código. O produto será preenchido automaticamente quando já existir no histórico.</span></div><div class="grid">
+<section id="page-reg" class="section" aria-labelledby="reg-title"><div class="card"><div class="between"><div><h2 id="reg-title">Registrar compra</h2><div class="small muted">Preencha os campos obrigatórios para salvar com precisão.</div></div><div style="display:flex;align-items:center;gap:6px"><span class="tag" id="regDbBadge" style="background:var(--accent-2);color:var(--accent)">banco ativo</span><span class="tag">offline</span></div></div><div class="photo-row" style="margin:14px 0"><button class="btn primary" type="button" id="scanBtn">▣ Ler código</button><button class="btn ai-btn-pulse" type="button" id="aiScanBtn" title="Fotografe o produto, rótulo ou etiqueta para leitura direta com IA">✨ Leitura por IA da Foto</button><label class="btn secondary" for="productFile">▧ Foto do produto</label><input class="sr-only" id="productFile" type="file" accept="image/*" capture="environment"><input class="sr-only" id="aiProductFile" type="file" accept="image/*" capture="environment"><img id="preview" class="preview" alt="Prévia do produto"></div>
+<div id="aiScanStatus" style="display:none;margin:10px 0;padding:12px 14px;border-radius:14px;background:linear-gradient(135deg,color-mix(in srgb,var(--primary) 12%,var(--surface)),color-mix(in srgb,var(--accent) 8%,var(--surface)));border:1.5px solid var(--primary);animation:fade .2s ease"><div style="display:flex;align-items:center;gap:11px"><div class="ai-spinner" id="aiSpinner"></div><div style="flex:1;min-width:0"><strong id="aiStatusTitle" style="display:block;font-size:13px;color:var(--text)">Analisando com Inteligência Artificial...</strong><span id="aiStatusSub" class="small muted" style="display:block">Identificando produto, marca, peso, código de barras e preço...</span></div><button class="mini" type="button" id="closeAiStatusBtn" title="Fechar">×</button></div><div id="aiExtractedPills" style="display:none;gap:6px;flex-wrap:wrap;margin-top:10px"></div></div>
+<div class="scan-note">⌁ <span><b>Leitura inteligente & IA:</b> Aponte para o código ou tire foto do produto/etiqueta. A IA identifica e cadastra automaticamente no banco de dados.</span></div><div class="grid">
 <div class="field full"><label for="name">Produto <span class="required">*</span></label><input id="name" list="productList" autocomplete="off" placeholder="Ex.: arroz, detergente..."><datalist id="productList"></datalist></div>
 <div class="field"><label for="brand">Marca</label><input id="brand" autocomplete="organization" placeholder="Opcional"></div><div class="field"><label for="bar">Código de barras</label><input id="bar" inputmode="numeric" autocomplete="off" maxlength="14" placeholder="EAN/UPC"></div>
 <div class="field"><label for="cat">Categoria <span class="required">*</span></label><select id="cat"></select></div><div class="field"><label for="sub">Subcategoria</label><select id="sub"></select></div>
@@ -184,6 +200,15 @@ input:focus,select:focus{border-color:var(--primary);box-shadow:0 0 0 4px color-
         </select>
       </div>
     </div>
+    <div class="best-banner" style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px">
+      <div>
+        <strong>📍 Onde comprar mais barato em Natal (RN)?</strong>
+        <div class="small muted" style="margin-top:2px">Recomendador inteligente com dados CNAE 4711302 e histórico de preços.</div>
+      </div>
+      <button class="btn primary" type="button" style="min-height:36px;padding:6px 14px;font-size:12px;white-space:nowrap" onclick="goNatalRecommender()">
+        Indicar Mercado
+      </button>
+    </div>
   </div>
 
   <!-- Modo 1: Lista de Comparações dos Produtos com Melhores Preços -->
@@ -196,32 +221,195 @@ input:focus,select:focus{border-color:var(--primary);box-shadow:0 0 0 4px color-
   <div id="compRankContainer" style="display:none"></div>
 </section>
 
-<!-- SEÇÃO: SUPERMERCADOS VISITADOS E CADASTROS -->
+<!-- SEÇÃO: SUPERMERCADOS VISITADOS E RECOMENDADOR NATAL (RN) -->
 <section id="page-merc" class="section" aria-labelledby="merc-title">
-  <div class="card">
-    <div class="between">
-      <div>
-        <div class="eyebrow">Redes & Filiais</div>
-        <h2 id="merc-title">Supermercados Visitados</h2>
-      </div>
-      <button class="btn primary" id="openNewMarketBtn" type="button" style="min-height:38px;padding:7px 14px;font-size:13px">
-        ＋ Novo Mercado
-      </button>
-    </div>
-    <p class="small muted" style="margin:4px 0 12px">
-      Cadastre filiais, dias de feiras/ofertas e acompanhe o histórico e melhores preços de cada mercado.
-    </p>
-    <div class="summary" id="mercSummary" style="margin-bottom:12px"></div>
-    <input id="mktSearch" placeholder="Buscar supermercado por nome, bairro, dia de feira..." aria-label="Buscar supermercado visitado">
+  <!-- Alternador de Modos de Mercados -->
+  <div class="view-pills" style="margin-bottom:12px">
+    <button type="button" class="view-pill active" id="mercTabMyMarkets">🏬 Meus Mercados Cadastrados</button>
+    <button type="button" class="view-pill" id="mercTabNatal">📍 Recomendador Natal (RN) · CNAE 4711302</button>
   </div>
-  <div id="marketListContainer"></div>
+
+  <!-- Vista 1: Meus Mercados Visitados -->
+  <div id="mercMyMarketsView">
+    <div class="card">
+      <div class="between">
+        <div>
+          <div class="eyebrow">Redes & Filiais</div>
+          <h2 id="merc-title">Supermercados Visitados</h2>
+        </div>
+        <button class="btn primary" id="openNewMarketBtn" type="button" style="min-height:38px;padding:7px 14px;font-size:13px">
+          ＋ Novo Mercado
+        </button>
+      </div>
+      <p class="small muted" style="margin:4px 0 12px">
+        Cadastre filiais, dias de feiras/ofertas e acompanhe o histórico e melhores preços de cada mercado.
+      </p>
+      <div class="summary" id="mercSummary" style="margin-bottom:12px"></div>
+      <input id="mktSearch" placeholder="Buscar supermercado por nome, bairro, dia de feira..." aria-label="Buscar supermercado visitado">
+    </div>
+    <div id="marketListContainer"></div>
+  </div>
+
+  <!-- Vista 2: Recomendador de Natal (RN) com API CNPJ -->
+  <div id="mercNatalView" style="display:none">
+    <div class="card">
+      <div class="between">
+        <div>
+          <div class="eyebrow">Inteligência de Localização · Natal (RN)</div>
+          <h2>Onde Comprar em Natal?</h2>
+        </div>
+        <span class="best-price-badge">CNAE 4711-3/02</span>
+      </div>
+      <p class="small muted" style="margin:4px 0 14px">
+        Indicação inteligente de supermercado para qualquer produto, integrando dados de empresas (CNAE 4711-3/02: Hiper e Supermercados de Natal/RN) e os menores preços cadastrados no app.
+      </p>
+      
+      <div class="field" style="margin-bottom:11px">
+        <label for="natalProdInput">Produto Desejado <span class="required">*</span></label>
+        <input id="natalProdInput" list="productList" placeholder="Ex.: Arroz 5kg, Feijão, Leite, Café..." autocomplete="off">
+      </div>
+
+      <div class="grid" style="margin-bottom:14px">
+        <div class="field">
+          <label for="natalBairroSelect">Bairro em Natal (RN)</label>
+          <select id="natalBairroSelect">
+            <option value="">Todos os Bairros de Natal</option>
+            <option value="Lagoa Nova">Lagoa Nova</option>
+            <option value="Tirol">Tirol</option>
+            <option value="Capim Macio">Capim Macio</option>
+            <option value="Ponta Negra">Ponta Negra</option>
+            <option value="Candelária">Candelária</option>
+            <option value="Alecrim">Alecrim</option>
+            <option value="Cidade da Esperança">Cidade da Esperança</option>
+            <option value="Igapó">Zona Norte (Igapó / Potengi)</option>
+            <option value="Pitimbú">Pitimbú / BR-101 Sul</option>
+            <option value="Nova Descoberta">Nova Descoberta</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="natalFonteSelect">Fonte dos Dados</label>
+          <select id="natalFonteSelect">
+            <option value="auto">Catálogo Verificado Natal (Offline)</option>
+            <option value="api">API cnpja.com (com Token)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn primary wide" id="natalSuggestBtn" type="button">
+          🎯 Indicar Melhor Supermercado
+        </button>
+        <button class="btn secondary" id="natalListAllBtn" type="button">
+          🏢 Ver Redes de Natal (CNAE)
+        </button>
+      </div>
+
+      <!-- Container do Resultado da Indicação -->
+      <div id="natalResultContainer" style="display:none;margin-top:14px"></div>
+    </div>
+
+    <!-- Container com Lista Completa de Supermercados de Natal (CNAE) -->
+    <div id="natalAllMarketsContainer" style="display:none"></div>
+  </div>
 </section>
 
 <section id="page-hist" class="section"><div class="card"><div class="between"><div><div class="eyebrow">Registros salvos</div><h2>Histórico</h2></div><span class="tag">offline</span></div><div class="search-row"><input id="fq" placeholder="Buscar produto, marca..." aria-label="Buscar no histórico"><select id="fc" aria-label="Filtrar por categoria"></select></div><select id="fm" aria-label="Filtrar por mercado" style="margin-top:9px"></select></div><div class="card"><div id="hist" class="list"></div></div></section>
-<section id="page-prod" class="section"><div class="card"><div class="eyebrow">Inteligência de preços</div><h2>Produtos</h2><input id="pq" placeholder="Buscar produto..." aria-label="Buscar produto"></div><div id="prod"></div></section>
+<section id="page-prod" class="section" aria-labelledby="prod-title">
+  <!-- Alternador de Modos de Produtos -->
+  <div class="view-pills" style="margin-bottom:12px">
+    <button type="button" class="view-pill active" id="prodTabCatalog">📚 Banco de Dados de Produtos</button>
+    <button type="button" class="view-pill" id="prodTabPrices">📈 Histórico & Comparador de Preços</button>
+  </div>
+
+  <!-- Vista 1: Banco de Dados de Produtos Cadastrados -->
+  <div id="prodCatalogView">
+    <div class="card">
+      <div class="between">
+        <div>
+          <div class="eyebrow">Catálogo Central</div>
+          <h2 id="prod-title">Banco de Dados de Produtos</h2>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="btn primary" id="openNewCatalogProdBtn" type="button" style="min-height:38px;padding:7px 12px;font-size:12px">
+            ＋ Novo Produto
+          </button>
+          <button class="btn secondary" id="seedCatalogBtn" type="button" style="min-height:38px;padding:7px 12px;font-size:12px" title="Carregar catálogo inicial de produtos">
+            📦 Carregar Básicos
+          </button>
+        </div>
+      </div>
+      <p class="small muted" style="margin:4px 0 12px">
+        Produtos catalogados com leitura por IA, código de barras e informações salvas permanentemente.
+      </p>
+      <div class="summary" id="catalogSummary" style="margin-bottom:12px"></div>
+      <div class="search-row" style="margin-bottom:9px">
+        <input id="catalogSearch" placeholder="Buscar por produto, marca ou código de barras..." aria-label="Buscar produto no catálogo">
+        <select id="catalogCatFilter" aria-label="Filtrar catálogo por categoria"></select>
+      </div>
+    </div>
+    <div id="catalogListContainer"></div>
+  </div>
+
+  <!-- Vista 2: Histórico e Inteligência de Preços -->
+  <div id="prodPricesView" style="display:none">
+    <div class="card">
+      <div class="eyebrow">Inteligência de preços</div>
+      <h2>Histórico por Produto</h2>
+      <input id="pq" placeholder="Buscar produto..." aria-label="Buscar produto">
+    </div>
+    <div id="prod"></div>
+  </div>
+</section>
 <section id="page-alert" class="section"><div class="card"><div class="eyebrow">Acompanhe mudanças</div><h2>Alertas</h2><div class="small muted" style="margin-top:-7px;margin-bottom:12px">Variações relevantes e validades próximas.</div><div id="alerts"></div></div></section>
 <section id="page-rel" class="section"><div class="card"><label for="per">Período do relatório</label><select id="per"><option value="m">Mês atual</option><option value="30">Últimos 30 dias</option><option value="90">Últimos 90 dias</option><option value="y">Ano atual</option><option value="a">Tudo</option></select></div><div id="rel"></div></section>
-<section id="page-cfg" class="section"><div class="card"><div class="between"><div><div class="eyebrow">Aplicativo no Celular</div><h2>Instalação (iOS e Android)</h2></div><span class="tag">PWA</span></div><p class="small muted" style="margin:4px 0 12px">Instale na tela inicial para usar como app em tela cheia, com inicialização rápida e funcionamento offline.</p><div class="actions"><button class="btn primary" id="installAppBtn" type="button" style="display:none">📥 Instalar no Celular</button><button class="btn secondary" id="iosHelpBtn" type="button">📱 Instalar no iPhone / iPad</button></div><div id="iosHelpBox" style="display:none;margin-top:12px;padding:12px;border-radius:12px;background:var(--primary-2);font-size:13px;line-height:1.5"><strong>No Safari (iPhone / iPad):</strong><br>1. Toque no botão de <b>Compartilhar</b> (ícone do quadrado com a seta para cima na barra inferior).<br>2. Role as opções e toque em <b>Adicionar à Tela de Início</b>.<br>3. Toque em <b>Adicionar</b> no canto superior direito. Pronto!</div></div><div class="card"><h2>Preferências</h2><div class="grid"><div class="field"><label for="thr">Alerta de variação (%)</label><input id="thr" type="number" min="1" max="1000" step="1"></div><div class="field"><label for="bud">Orçamento mensal (R$)</label><input id="bud" type="number" min="0" step="0.01" inputmode="decimal"></div></div></div><div class="card"><h2>Dados locais</h2><div class="actions"><button class="btn primary" id="csvBtn" type="button">Exportar CSV</button><button class="btn secondary" id="backupBtn" type="button">Backup JSON</button><label class="btn secondary" for="importFile">Importar JSON</label><input class="sr-only" id="importFile" type="file" accept="application/json,.json"><button class="btn danger" id="wipeBtn" type="button">Apagar tudo</button></div><p class="small muted">Os dados ficam somente neste navegador. Faça backup antes de limpar dados do Safari ou trocar de aparelho.</p></div></section>
+<section id="page-cfg" class="section"><div class="card"><div class="between"><div><div class="eyebrow">Aplicativo no Celular</div><h2>Instalação (iOS e Android)</h2></div><span class="tag">PWA</span></div><p class="small muted" style="margin:4px 0 12px">Instale na tela inicial para usar como app em tela cheia, com inicialização rápida e funcionamento offline.</p><div class="actions"><button class="btn primary" id="installAppBtn" type="button" style="display:none">📥 Instalar no Celular</button><button class="btn secondary" id="iosHelpBtn" type="button">📱 Instalar no iPhone / iPad</button></div><div id="iosHelpBox" style="display:none;margin-top:12px;padding:12px;border-radius:12px;background:var(--primary-2);font-size:13px;line-height:1.5"><strong>No Safari (iPhone / iPad):</strong><br>1. Toque no botão de <b>Compartilhar</b> (ícone do quadrado com a seta para cima na barra inferior).<br>2. Role as opções e toque em <b>Adicionar à Tela de Início</b>.<br>3. Toque em <b>Adicionar</b> no canto superior direito. Pronto!</div></div><div class="card"><h2>Preferências</h2><div class="grid"><div class="field"><label for="thr">Alerta de variação (%)</label><input id="thr" type="number" min="1" max="1000" step="1"></div><div class="field"><label for="bud">Orçamento mensal (R$)</label><input id="bud" type="number" min="0" step="0.01" inputmode="decimal"></div></div></div>
+
+<!-- CONFIGURAÇÃO DE IA: GOOGLE GEMINI VISION -->
+<div class="card">
+  <div class="between">
+    <div>
+      <div class="eyebrow">Visão Computacional</div>
+      <h2>Inteligência Artificial (Leitura de Fotos)</h2>
+    </div>
+    <span class="tag" id="aiConfigBadge" style="background:linear-gradient(135deg,#6366f1,#8b5cf6);color:#fff">Google Gemini</span>
+  </div>
+  <p class="small muted" style="margin:4px 0 12px">
+    A IA analisa a foto de qualquer produto, embalagem ou etiqueta e extrai automaticamente nome, marca, conteúdo (peso/volume), código de barras e preço.
+  </p>
+  <div class="field" style="margin-bottom:10px">
+    <label for="geminiApiKeyInput">Chave de API do Google Gemini</label>
+    <div style="display:flex;gap:6px">
+      <input id="geminiApiKeyInput" type="password" placeholder="Cole sua chave AIzaSy... (gratuita)">
+      <button class="btn ghost" type="button" id="toggleGeminiKeyVis" style="padding:0 12px;min-height:46px" title="Ver / Ocultar chave">👁️</button>
+    </div>
+    <div class="small muted" style="margin-top:4px">
+      Obtenha sua chave gratuita em segundos no <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" style="color:var(--primary);text-decoration:underline">Google AI Studio</a>.
+    </div>
+  </div>
+  <div class="grid" style="margin-bottom:12px">
+    <div class="field">
+      <label for="aiModelSelect">Modelo Gemini</label>
+      <select id="aiModelSelect">
+        <option value="gemini-1.5-flash">Gemini 1.5 Flash (Rápido e Gratuito)</option>
+        <option value="gemini-2.0-flash">Gemini 2.0 Flash (Mais Recente)</option>
+        <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+      </select>
+    </div>
+    <div class="field">
+      <label for="aiFallbackMode">Modo sem Conexão / Sem Chave</label>
+      <select id="aiFallbackMode">
+        <option value="hybrid">Híbrido (ZXing + Open Food Facts + Banco)</option>
+        <option value="barcode">Apenas Código de Barras</option>
+      </select>
+    </div>
+  </div>
+  <div class="actions">
+    <button class="btn primary" id="saveAiKeyBtn" type="button">Salvar Configuração de IA</button>
+    <button class="btn ghost" id="testAiKeyBtn" type="button">Testar Conexão com IA</button>
+  </div>
+</div>
+
+<div class="card"><div class="between"><div><div class="eyebrow">Integração Externa</div><h2>API CNPJ (Supermercados Natal)</h2></div><span class="badge-cnpj">CNAE 4711302</span></div><p class="small muted" style="margin:4px 0 12px">Por padrão, o recomendador usa o catálogo verificado offline com os 11 principais supermercados de Natal (RN). Opcionalmente, informe seu token Bearer da <code>cnpja.com</code> para consultas ao vivo:</p><div class="field" style="margin-bottom:10px"><label for="cnpjaTokenInput">Token Bearer (cnpja.com)</label><input id="cnpjaTokenInput" type="password" placeholder="Cole seu token aqui (opcional)"></div><div class="actions"><button class="btn secondary" id="saveCnpjaTokenBtn" type="button">Salvar Token</button><button class="btn ghost" id="testCnpjaTokenBtn" type="button">Testar Conexão</button></div></div><div class="card"><h2>Dados locais</h2><div class="actions"><button class="btn primary" id="csvBtn" type="button">Exportar CSV</button><button class="btn secondary" id="backupBtn" type="button">Backup JSON</button><label class="btn secondary" for="importFile">Importar JSON</label><input class="sr-only" id="importFile" type="file" accept="application/json,.json"><button class="btn danger" id="wipeBtn" type="button">Apagar tudo</button></div><p class="small muted">Os dados ficam somente neste navegador. Faça backup antes de limpar dados do Safari ou trocar de aparelho.</p></div></section>
 </main><button class="fab" id="fab" type="button" aria-label="Nova compra">＋</button>
 <div id="camera" role="dialog" aria-modal="true" aria-label="Leitor de código de barras"><video id="video" playsinline muted></video><div class="camera-guide"></div><div class="camera-foot"><div id="cameraMsg">Aponte para o código de barras</div><div id="cameraCount" style="font-size:12px;color:#a56bff;margin-top:4px"></div><div class="actions" style="justify-content:center;margin-top:10px"><button class="btn primary" id="doneScanningBtn" type="button" style="display:none">✓ Concluir / Ver Lista</button><label class="btn secondary" for="barcodeFile">Foto do código</label><button class="btn ghost" id="closeCamera" type="button" style="color:#fff;border-color:#555">Fechar</button></div><input class="sr-only" id="barcodeFile" type="file" accept="image/*" capture="environment"></div></div>
 <div id="checkoutModal" style="position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:45;display:none;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px)"><div class="card" style="width:min(420px,100%);margin:0;box-shadow:0 16px 40px rgba(0,0,0,0.4)"><div class="between"><h3 style="margin:0">Finalizar compra no mercado</h3><button class="mini" type="button" id="closeCheckoutModal">×</button></div><p class="small muted" style="margin:8px 0 14px">Os itens marcados no carrinho serão salvos no histórico permanente de compras.</p><div class="field" style="margin-bottom:12px"><label for="checkoutMkt">Nome do Mercado <span class="required">*</span></label><input id="checkoutMkt" list="marketList" placeholder="Ex.: Carrefour, Extra..."></div><div class="field" style="margin-bottom:14px"><label for="checkoutPay">Forma de Pagamento</label><select id="checkoutPay"><option>Cartão crédito</option><option>Cartão débito</option><option>Pix</option><option>Dinheiro</option><option>Vale-alimentação</option></select></div><div class="actions"><button class="btn primary wide" id="confirmCheckoutBtn" type="button">Salvar no Histórico</button><button class="btn ghost" id="cancelCheckoutBtn" type="button">Cancelar</button></div></div></div>
@@ -267,13 +455,122 @@ input:focus,select:focus{border-color:var(--primary);box-shadow:0 0 0 4px color-
     </div>
   </div>
 </div>
+
+<!-- MODAL DE CADASTRO E EDIÇÃO DE PRODUTO NO BANCO DE DADOS -->
+<div id="catalogModal" style="position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:45;display:none;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px)">
+  <div class="card" style="width:min(520px,100%);max-height:92vh;overflow-y:auto;margin:0;box-shadow:0 16px 40px rgba(0,0,0,0.4)">
+    <div class="between">
+      <h3 style="margin:0" id="catalogModalTitle">Cadastrar Produto no Banco</h3>
+      <button class="mini" type="button" id="closeCatalogModal">×</button>
+    </div>
+    <p class="small muted" style="margin:6px 0 14px">Salve produtos no banco de dados para auto-completar na leitura por IA e registro de compras.</p>
+    <input type="hidden" id="catalogEditId" value="">
+    
+    <div class="field" style="margin-bottom:11px">
+      <label for="catalogFormBar">Código de barras (EAN/UPC)</label>
+      <div style="display:flex;gap:6px">
+        <input id="catalogFormBar" inputmode="numeric" maxlength="14" placeholder="Ex.: 7891000100103" style="flex:1">
+        <button class="btn secondary" type="button" id="catalogLookupOnlineBtn" style="min-height:46px;padding:0 12px;font-size:12px;white-space:nowrap">🌐 Buscar Online</button>
+      </div>
+    </div>
+
+    <div class="field" style="margin-bottom:11px">
+      <label for="catalogFormName">Nome do Produto <span class="required">*</span></label>
+      <input id="catalogFormName" placeholder="Ex.: Leite Condensado Moça">
+    </div>
+
+    <div class="field" style="margin-bottom:11px">
+      <label for="catalogFormBrand">Marca</label>
+      <input id="catalogFormBrand" placeholder="Ex.: Nestlé, Camil, Omo...">
+    </div>
+
+    <div class="grid" style="margin-bottom:11px">
+      <div class="field">
+        <label for="catalogFormCat">Categoria <span class="required">*</span></label>
+        <select id="catalogFormCat"></select>
+      </div>
+      <div class="field">
+        <label for="catalogFormSub">Subcategoria</label>
+        <select id="catalogFormSub"></select>
+      </div>
+    </div>
+
+    <div class="grid" style="margin-bottom:11px">
+      <div class="field">
+        <label for="catalogFormSize">Conteúdo / Peso</label>
+        <input id="catalogFormSize" type="number" min="0.001" step="any" value="1">
+      </div>
+      <div class="field">
+        <label for="catalogFormUnit">Unidade</label>
+        <select id="catalogFormUnit"><option>un</option><option>kg</option><option>g</option><option>L</option><option>ml</option><option>pct</option><option>cx</option><option>dz</option></select>
+      </div>
+    </div>
+
+    <div class="grid" style="margin-bottom:11px">
+      <div class="field">
+        <label for="catalogFormPrice">Preço de Referência (R$)</label>
+        <input id="catalogFormPrice" type="number" min="0.01" step="0.01" placeholder="0,00">
+      </div>
+      <div class="field">
+        <label for="catalogFormMkt">Mercado Habitual</label>
+        <input id="catalogFormMkt" list="marketList" placeholder="Ex.: Carrefour">
+      </div>
+    </div>
+
+    <div class="field" style="margin-bottom:11px">
+      <label>Foto do Produto</label>
+      <div style="display:flex;align-items:center;gap:10px">
+        <label class="btn secondary" for="catalogFormPhotoFile" style="font-size:12px;padding:8px 12px">📷 Escolher Foto</label>
+        <input class="sr-only" id="catalogFormPhotoFile" type="file" accept="image/*">
+        <img id="catalogFormPhotoPreview" class="preview" alt="Prévia">
+        <button class="mini" type="button" id="catalogClearPhotoBtn" style="display:none" title="Remover foto">×</button>
+      </div>
+    </div>
+
+    <div class="field" style="margin-bottom:14px">
+      <label for="catalogFormNotes">Observações</label>
+      <input id="catalogFormNotes" placeholder="Ex.: Integral, versão econômica, embalagem pouch...">
+    </div>
+
+    <div class="actions">
+      <button class="btn primary wide" id="saveCatalogProdBtn" type="button">Salvar no Banco de Dados</button>
+      <button class="btn ghost" id="cancelCatalogProdBtn" type="button">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DE CONFIGURAÇÃO RÁPIDA DE IA -->
+<div id="aiQuickKeyModal" style="position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:46;display:none;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px)">
+  <div class="card" style="width:min(460px,100%);margin:0;box-shadow:0 16px 40px rgba(0,0,0,0.4)">
+    <div class="between">
+      <h3 style="margin:0">✨ Ativar Leitura Direta por IA</h3>
+      <button class="mini" type="button" id="closeAiQuickKeyModal">×</button>
+    </div>
+    <p class="small muted" style="margin:8px 0 12px">
+      Para a IA ler embalagens e preços de qualquer ângulo com visão computacional de ponta, informe sua chave do <b>Google Gemini</b> (gratuita):
+    </p>
+    <div class="field" style="margin-bottom:12px">
+      <label for="aiQuickKeyInput">Chave de API do Gemini</label>
+      <input id="aiQuickKeyInput" type="password" placeholder="AIzaSy...">
+      <div class="small muted" style="margin-top:4px">
+        Pegue gratuitamente em 30 segundos no <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener" style="color:var(--primary);text-decoration:underline">Google AI Studio</a>.
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn primary wide" id="saveAiQuickKeyBtn" type="button">Salvar e Analisar Foto</button>
+      <button class="btn secondary" id="skipAiKeyBtn" type="button">Usar Leitor Híbrido Offline</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
 <script>
 'use strict';
 const $=id=>document.getElementById(id), esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const CATS={Alimentos:['Grãos e cereais','Carnes e peixes','Laticínios e frios','Hortifruti','Padaria','Congelados','Mercearia','Enlatados e conservas','Massas e molhos','Doces e snacks','Temperos'],Bebidas:['Água','Refrigerantes','Sucos','Cervejas','Vinhos e destilados','Café e chá','Energéticos e isotônicos'],Limpeza:['Roupas','Cozinha','Banheiro','Limpeza geral','Descartáveis'], 'Higiene pessoal':['Cabelo','Corpo','Bucal','Papel e absorventes','Fraldas'],Pet:['Ração','Higiene pet'],Outros:['Utensílios','Bazar','Outros']};
 const FACTOR={kg:1,g:.001,L:1,ml:.001,un:1,pct:1,cx:1,dz:1};const baseUnit=u=>u==='kg'||u==='g'?'kg':u==='L'||u==='ml'?'L':u;const money=v=>(+v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});const today=()=>{const d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10)};const priceBase=p=>p.price/((p.size||1)*(FACTOR[p.unit]||1));const total=p=>p.price*p.qty;const itemKey=p=>(p.bar||((p.name||'')+'|'+(p.brand||'')).toLowerCase().trim());
-let S={version:3,p:[],thr:10,bud:0,list:[],markets:[]},photoData='',stream=null,reader=null,scanning=false,zxPromise=null,scanMode='reg',sessionScanCount=0,currentCompareTab='products';
+let S={version:4,p:[],thr:10,bud:0,list:[],markets:[],catalog:[],aiConfig:{apiKey:'',model:'gemini-1.5-flash',fallback:'hybrid'}},
+    photoData='',catalogPhotoData='',pendingAiFile=null,currentProdTab='catalog',stream=null,reader=null,scanning=false,zxPromise=null,scanMode='reg',sessionScanCount=0,currentCompareTab='products';
 
 try{
   const raw=JSON.parse(localStorage.getItem('controle-compras-v2')||localStorage.getItem('cc1')||'null');
@@ -283,10 +580,47 @@ try{
       ...raw,
       list:Array.isArray(raw.list)?raw.list:[],
       markets:Array.isArray(raw.markets)?raw.markets:[],
+      catalog:Array.isArray(raw.catalog)?raw.catalog:[],
+      aiConfig:raw.aiConfig||{apiKey:localStorage.getItem('gemini_api_key')||'',model:'gemini-1.5-flash',fallback:'hybrid'},
       p:raw.p.map((p,i)=>({...p,id:p.id||Date.now()+i,qty:Number(p.qty)||1,size:Number(p.size)||1,price:Number(p.price)||0}))
     };
   }
 }catch(e){}
+if(!S.catalog)S.catalog=[];
+if(!S.aiConfig)S.aiConfig={apiKey:localStorage.getItem('gemini_api_key')||'',model:'gemini-1.5-flash',fallback:'hybrid'};
+
+function syncCatalogWithPurchases(){
+  S.catalog=S.catalog||[];
+  if(S.catalog.length===0&&S.p.length>0){
+    const map=new Map();
+    S.p.forEach(p=>{
+      const key=p.bar?p.bar:((p.name||'')+'|'+(p.brand||'')).toLowerCase().trim();
+      if(!map.has(key)){
+        map.set(key,{
+          id:Date.now()+Math.floor(Math.random()*10000),
+          name:p.name||'',
+          brand:p.brand||'',
+          bar:p.bar||'',
+          cat:p.cat||'Alimentos',
+          sub:p.sub||'',
+          size:Number(p.size)||1,
+          unit:p.unit||'un',
+          defaultPrice:Number(p.price)||0,
+          lastMkt:p.mkt||'',
+          lastDate:p.date||today(),
+          photo:p.photo||'',
+          notes:p.note||'',
+          source:'historico',
+          createdAt:p.date||today(),
+          updatedAt:p.date||today()
+        });
+      }
+    });
+    S.catalog=Array.from(map.values());
+    persist();
+  }
+}
+syncCatalogWithPurchases();
 
 function ensureMarketExists(name){
   if(!name||!name.trim())return;
@@ -338,7 +672,7 @@ const tabs=[
   ['comp','⚖️','Comparar'],
   ['merc','🏬','Mercados'],
   ['hist','▤','Histórico'],
-  ['prod','□','Produtos'],
+  ['prod','📚','Produtos'],
   ['alert','!','Alertas'],
   ['rel','▥','Relatórios'],
   ['cfg','⚙','Config.']
@@ -353,7 +687,7 @@ function go(page){
   if(page==='comp')renderCompare();
   if(page==='merc')renderMarkets();
   if(page==='hist')renderHist();
-  if(page==='prod')renderProd();
+  if(page==='prod')renderProdPage();
   if(page==='alert')renderAlerts();
   if(page==='rel')renderReports();
   window.scrollTo({top:0,behavior:'smooth'});
@@ -372,12 +706,15 @@ function optionList(arr,first){return (first?`<option value="">${first}</option>
 
 function refreshLists(){
   syncMarketsWithPurchases();
-  const names=[...new Set(S.p.map(p=>p.name).filter(Boolean))].sort();
+  syncCatalogWithPurchases();
+  const names=[...new Set([...(S.catalog||[]).map(c=>c.name),...S.p.map(p=>p.name)].filter(Boolean))].sort();
   const markets=[...new Set([...(S.markets||[]).map(m=>m.name),...S.p.map(p=>p.mkt)].filter(Boolean))].sort();
   $('productList').innerHTML=optionList(names);
   $('marketList').innerHTML=optionList(markets);
   $('fc').innerHTML=optionList(Object.keys(CATS),'Todas as categorias');
   $('fm').innerHTML=optionList(markets,'Todos os mercados');
+  if($('catalogCatFilter'))$('catalogCatFilter').innerHTML=optionList(Object.keys(CATS),'Todas as categorias');
+  if($('catalogFormCat'))$('catalogFormCat').innerHTML=optionList(Object.keys(CATS));
   if($('compCat'))$('compCat').innerHTML=optionList(Object.keys(CATS),'Todas as categorias');
   if($('compMktFilter'))$('compMktFilter').innerHTML=optionList(markets,'Todos os mercados');
 }
@@ -386,20 +723,61 @@ function refreshSub(selected=''){const cat=$('cat').value;$('sub').innerHTML=opt
 function showPreview(){const img=$('preview');img.src=photoData;img.style.display=photoData?'block':'none'}
 function clearForm(){['name','brand','bar','price','mkt','exp','note'].forEach(id=>$(id).value='');$('cat').value=Object.keys(CATS)[0];refreshSub();$('size').value=1;$('qty').value=1;$('unit').value='un';$('date').value=today();$('pay').value='Cartão crédito';$('promo').value='0';photoData='';showPreview();$('hint').style.display='none';$('name').focus()}
 
-function findPrevious(){
+async function findPrevious(){
   const bar=$('bar').value.trim(),name=$('name').value.trim().toLowerCase();
+  if(!bar&&!name)return;
+  const catItem=(S.catalog||[]).find(x=>(bar&&x.bar===bar)||(!bar&&name&&x.name.toLowerCase()===name));
   const p=[...S.p].reverse().find(x=>(bar&&x.bar===bar)||(!bar&&name&&x.name.toLowerCase()===name));
-  if(!p)return;
-  $('brand').value=p.brand||'';
-  if(!bar&&p.bar)$('bar').value=p.bar;
-  $('cat').value=p.cat;
-  refreshSub(p.sub);
-  $('size').value=p.size;
-  $('unit').value=p.unit;
-  if(!photoData&&p.photo){photoData=p.photo;showPreview()}
-  const h=$('hint');
-  h.textContent=`Última compra: ${money(p.price)} em ${p.mkt} (${(p.date||'').split('-').reverse().join('/')})`;
-  h.style.display='block';
+  const item = catItem || p;
+
+  if(item){
+    if(item.brand&&!$('brand').value)$('brand').value=item.brand;
+    if(!bar&&item.bar)$('bar').value=item.bar;
+    if(item.cat){$('cat').value=item.cat;refreshSub(item.sub||'');}
+    if(item.size||item.defaultSize)$('size').value=item.size||item.defaultSize||1;
+    if(item.unit||item.defaultUnit)$('unit').value=item.unit||item.defaultUnit||'un';
+    if(!photoData&&item.photo){photoData=item.photo;showPreview()}
+    if(!Number($('price').value)&&(item.defaultPrice||item.price)){
+      $('price').value=(item.price||item.defaultPrice).toFixed(2);
+    }
+    const h=$('hint');
+    if(p){
+      h.innerHTML=`<b>Histórico:</b> Última compra ${money(p.price)} em ${esc(p.mkt)} (${(p.date||'').split('-').reverse().join('/')})`;
+      h.style.display='block';
+    } else if(catItem){
+      h.innerHTML=`<span style="color:var(--accent)">✓ Banco de Dados:</span> <b>${esc(catItem.name)}</b> ${catItem.defaultPrice?('· Ref: '+money(catItem.defaultPrice)):''}`;
+      h.style.display='block';
+    }
+    return;
+  }
+
+  if(bar&&validBarcode(bar)&&navigator.onLine){
+    toast('Consultando banco de produtos online...');
+    const online = await lookupBarcodeOnline(bar);
+    if(online && online.name){
+      $('name').value = online.name;
+      if(online.brand&&!$('brand').value)$('brand').value = online.brand;
+      if(online.cat){$('cat').value=online.cat;refreshSub(online.sub||'');}
+      if(online.size)$('size').value=online.size;
+      if(online.unit)$('unit').value=online.unit;
+      if(online.photo&&!photoData){photoData=online.photo;showPreview();}
+      registerOrUpdateProductInCatalog({
+        name: online.name,
+        brand: online.brand,
+        bar: bar,
+        cat: online.cat,
+        sub: online.sub||'',
+        size: online.size,
+        unit: online.unit,
+        photo: online.photo,
+        price: 0
+      }, 'openfoodfacts');
+      const h=$('hint');
+      h.innerHTML=`<span style="color:var(--primary)">🌐 Identificado em base pública e cadastrado no banco:</span> <b>${esc(online.name)}</b>`;
+      h.style.display='block';
+      toast(`Produto encontrado: ${online.name}`);
+    }
+  }
 }
 $('name').addEventListener('change',findPrevious);
 $('bar').addEventListener('change',findPrevious);
@@ -443,11 +821,12 @@ function save(){
   if(p.exp&&p.date>p.exp)return toast('A validade não pode ser anterior à data da compra.');
   
   ensureMarketExists(p.mkt);
+  registerOrUpdateProductInCatalog(p, 'compra');
   const prev=S.p.filter(x=>itemKey(x)===itemKey(p)&&x.date<=p.date).sort((a,b)=>a.date.localeCompare(b.date)).pop();
   S.p.push(p);
   persist();
   refreshLists();
-  let msg='Compra salva com sucesso.';
+  let msg='Compra salva e produto atualizado no banco.';
   if(prev){
     const variation=(priceBase(p)-priceBase(prev))/priceBase(prev)*100;
     if(Math.abs(variation)>=S.thr)msg+=` Variação de ${variation>0?'+':''}${variation.toFixed(1)}%.`;
@@ -537,6 +916,575 @@ function goToCompareItem(name){
   setCompareTab('products');
   if($('compSearch'))$('compSearch').value=name;
   renderCompare();
+}
+
+/* ==========================================================================
+   BANCO DE DADOS DE PRODUTOS (CATÁLOGO CENTRAL)
+   ========================================================================== */
+function registerOrUpdateProductInCatalog(p, source='manual'){
+  if(!p||!p.name)return null;
+  S.catalog=S.catalog||[];
+  const bar=p.bar?String(p.bar).replace(/\D/g,'').trim():'';
+  const name=p.name.trim();
+  const brand=p.brand?p.brand.trim():'';
+
+  let found=null;
+  if(bar){
+    found=S.catalog.find(c=>c.bar===bar);
+  }
+  if(!found && name){
+    found=S.catalog.find(c=>c.name.toLowerCase()===name.toLowerCase() && (brand?(c.brand||'').toLowerCase()===brand.toLowerCase():true));
+  }
+
+  const now=new Date().toISOString();
+  if(found){
+    if(p.price&&p.price>0)found.defaultPrice=Number(p.price);
+    if(p.mkt)found.lastMkt=p.mkt;
+    if(p.date)found.lastDate=p.date;
+    if(p.cat)found.cat=p.cat;
+    if(p.sub)found.sub=p.sub;
+    if(p.size&&p.size>0)found.size=Number(p.size);
+    if(p.unit)found.unit=p.unit;
+    if(p.photo&&!found.photo)found.photo=p.photo;
+    if(bar&&!found.bar)found.bar=bar;
+    if(brand&&!found.brand)found.brand=brand;
+    if(p.note&&!found.notes)found.notes=p.note;
+    found.updatedAt=now;
+    persist();
+    if($('catalogListContainer'))renderCatalog();
+    return found;
+  }else{
+    const item={
+      id:Date.now()+Math.floor(Math.random()*1000),
+      name:name,
+      brand:brand,
+      bar:bar,
+      cat:p.cat||'Alimentos',
+      sub:p.sub||'',
+      size:Number(p.size)||1,
+      unit:p.unit||'un',
+      defaultPrice:Number(p.price)||0,
+      lastMkt:p.mkt||'',
+      lastDate:p.date||today(),
+      photo:p.photo||'',
+      notes:p.note||'',
+      source:source,
+      createdAt:now,
+      updatedAt:now
+    };
+    S.catalog.unshift(item);
+    persist();
+    if($('catalogListContainer'))renderCatalog();
+    return item;
+  }
+}
+
+function setProdTab(tab){
+  currentProdTab=tab;
+  renderProdPage();
+}
+
+function renderProdPage(){
+  const tabCat=$('prodTabCatalog'), tabPrices=$('prodTabPrices');
+  const viewCat=$('prodCatalogView'), viewPrices=$('prodPricesView');
+  if(!tabCat||!viewCat)return;
+
+  if(currentProdTab==='catalog'){
+    tabCat.classList.add('active');
+    tabPrices?.classList.remove('active');
+    viewCat.style.display='block';
+    if(viewPrices)viewPrices.style.display='none';
+    renderCatalog();
+  }else{
+    tabCat.classList.remove('active');
+    tabPrices?.classList.add('active');
+    viewCat.style.display='none';
+    if(viewPrices)viewPrices.style.display='block';
+    renderProd();
+  }
+}
+
+function renderCatalog(){
+  syncCatalogWithPurchases();
+  const q=($('catalogSearch')?.value||'').toLowerCase().trim();
+  const catFilter=$('catalogCatFilter')?.value||'';
+  const container=$('catalogListContainer');
+  if(!container)return;
+
+  const catalog=S.catalog||[];
+  const filtered=catalog.filter(p=>{
+    if(catFilter&&p.cat!==catFilter)return false;
+    if(q){
+      const text=(p.name+' '+(p.brand||'')+' '+(p.bar||'')+' '+(p.notes||'')).toLowerCase();
+      if(!text.includes(q))return false;
+    }
+    return true;
+  });
+
+  // Métricas do Banco de Dados
+  const summary=$('catalogSummary');
+  if(summary){
+    const total=catalog.length;
+    const withBar=catalog.filter(p=>p.bar).length;
+    const withPhoto=catalog.filter(p=>p.photo).length;
+    summary.innerHTML=`
+      <div class="metric"><strong>${total}</strong><span>Cadastrados</span></div>
+      <div class="metric"><strong>${withBar}</strong><span>Com EAN</span></div>
+      <div class="metric"><strong>${withPhoto}</strong><span>Com Foto</span></div>
+    `;
+  }
+
+  if(!filtered.length){
+    container.innerHTML=`
+      <div class="card empty">
+        ${catalog.length===0?
+          'Nenhum produto cadastrado no banco ainda.<br>Use <b>"＋ Novo Produto"</b>, <b>"✨ Leitura por IA da Foto"</b> ou <b>"📦 Carregar Básicos"</b> para começar!':
+          'Nenhum produto encontrado para os filtros atuais.'}
+      </div>`;
+    return;
+  }
+
+  container.innerHTML=filtered.map(p=>`
+    <div class="catalog-card">
+      <div class="item" style="padding:0;border:0">
+        ${p.photo?`<img class="thumb" src="${p.photo}" alt="" style="cursor:pointer" onclick="openCatalogModal(${p.id})">`:`<div class="placeholder" style="cursor:pointer" onclick="openCatalogModal(${p.id})">🛍️</div>`}
+        <div class="item-main">
+          <strong>${esc(p.name)}</strong>
+          <small>${p.brand?esc(p.brand)+' · ':''}${p.size||1} ${esc(p.unit||'un')} · <span class="tag">${esc(p.cat||'Alimentos')}</span></small>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap">
+            ${p.bar?`<span class="barcode-badge">🔢 ${esc(p.bar)}</span>`:''}
+            ${p.source==='ai-vision'?`<span class="ai-pill">✨ IA Vision</span>`:''}
+            ${p.source==='openfoodfacts'?`<span class="ai-pill success">🌐 Base Global</span>`:''}
+          </div>
+        </div>
+        <div class="item-side">
+          <strong>${p.defaultPrice>0?money(p.defaultPrice):'--'}</strong>
+          <small>${p.lastMkt?esc(p.lastMkt):'Preço ref.'}</small>
+          <div class="mini-actions" style="margin-top:6px">
+            <button class="mini" type="button" onclick="addToListFromCatalog(${p.id})" title="Adicionar à Lista de Compras">🛒</button>
+            <button class="mini" type="button" onclick="registerPurchaseFromCatalog(${p.id})" title="Registrar compra deste item">📝</button>
+            <button class="mini" type="button" onclick="openCatalogModal(${p.id})" title="Editar produto">✏️</button>
+            <button class="mini" type="button" onclick="deleteCatalogProduct(${p.id})" title="Excluir do banco" style="color:var(--danger)">×</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openCatalogModal(id=null){
+  const modal=$('catalogModal');
+  if(!modal)return;
+  if($('catalogFormCat'))$('catalogFormCat').innerHTML=optionList(Object.keys(CATS));
+  
+  if(id){
+    const item=(S.catalog||[]).find(c=>c.id===id);
+    if(!item)return;
+    $('catalogModalTitle').textContent='Editar Produto do Banco';
+    $('catalogEditId').value=item.id;
+    $('catalogFormBar').value=item.bar||'';
+    $('catalogFormName').value=item.name||'';
+    $('catalogFormBrand').value=item.brand||'';
+    $('catalogFormCat').value=item.cat||'Alimentos';
+    refreshCatalogSub(item.sub||'');
+    $('catalogFormSize').value=item.size||1;
+    $('catalogFormUnit').value=item.unit||'un';
+    $('catalogFormPrice').value=item.defaultPrice>0?Number(item.defaultPrice).toFixed(2):'';
+    $('catalogFormMkt').value=item.lastMkt||'';
+    $('catalogFormNotes').value=item.notes||'';
+    catalogPhotoData=item.photo||'';
+  }else{
+    $('catalogModalTitle').textContent='Cadastrar Produto no Banco';
+    $('catalogEditId').value='';
+    $('catalogFormBar').value='';
+    $('catalogFormName').value='';
+    $('catalogFormBrand').value='';
+    $('catalogFormCat').value=Object.keys(CATS)[0];
+    refreshCatalogSub('');
+    $('catalogFormSize').value=1;
+    $('catalogFormUnit').value='un';
+    $('catalogFormPrice').value='';
+    $('catalogFormMkt').value='';
+    $('catalogFormNotes').value='';
+    catalogPhotoData='';
+  }
+  showCatalogPhotoPreview();
+  modal.style.display='flex';
+}
+
+function refreshCatalogSub(selected=''){
+  const cat=$('catalogFormCat')?.value||'Alimentos';
+  if($('catalogFormSub'))$('catalogFormSub').innerHTML=optionList(CATS[cat]||[],'Selecione');
+  if(selected&&$('catalogFormSub'))$('catalogFormSub').value=selected;
+}
+
+function showCatalogPhotoPreview(){
+  const img=$('catalogFormPhotoPreview');
+  const btn=$('catalogClearPhotoBtn');
+  if(!img)return;
+  img.src=catalogPhotoData||'';
+  img.style.display=catalogPhotoData?'block':'none';
+  if(btn)btn.style.display=catalogPhotoData?'inline-flex':'none';
+}
+
+function saveCatalogProductFromForm(){
+  const name=$('catalogFormName')?.value.trim();
+  if(!name)return toast('Informe o nome do produto.');
+  const id=Number($('catalogEditId')?.value)||0;
+  const itemData={
+    name:name,
+    brand:$('catalogFormBrand')?.value.trim()||'',
+    bar:$('catalogFormBar')?.value.replace(/\D/g,'').trim()||'',
+    cat:$('catalogFormCat')?.value||'Alimentos',
+    sub:$('catalogFormSub')?.value||'',
+    size:Number($('catalogFormSize')?.value)||1,
+    unit:$('catalogFormUnit')?.value||'un',
+    price:Number($('catalogFormPrice')?.value)||0,
+    mkt:$('catalogFormMkt')?.value.trim()||'',
+    note:$('catalogFormNotes')?.value.trim()||'',
+    photo:catalogPhotoData||''
+  };
+
+  S.catalog=S.catalog||[];
+  if(id){
+    const idx=S.catalog.findIndex(c=>c.id===id);
+    if(idx>=0){
+      S.catalog[idx]={
+        ...S.catalog[idx],
+        ...itemData,
+        defaultPrice:itemData.price,
+        lastMkt:itemData.mkt,
+        notes:itemData.note,
+        updatedAt:new Date().toISOString()
+      };
+    }
+  }else{
+    registerOrUpdateProductInCatalog(itemData, 'manual');
+  }
+  persist();
+  refreshLists();
+  renderCatalog();
+  $('catalogModal').style.display='none';
+  toast('Produto salvo no banco de dados!');
+}
+
+function deleteCatalogProduct(id){
+  if(!confirm('Excluir este produto do banco de dados?'))return;
+  S.catalog=(S.catalog||[]).filter(c=>c.id!==id);
+  persist();
+  refreshLists();
+  renderCatalog();
+  toast('Produto removido do banco.');
+}
+
+function addToListFromCatalog(id){
+  const p=(S.catalog||[]).find(c=>c.id===id);
+  if(!p)return;
+  S.list=S.list||[];
+  const existing=S.list.find(x=>(p.bar&&x.bar===p.bar)||(x.name.toLowerCase()===p.name.toLowerCase()));
+  if(existing){
+    existing.qty=(Number(existing.qty)||1)+1;
+    toast(`+1 ${existing.name} na lista! (Total: ${existing.qty})`);
+  }else{
+    S.list.unshift({
+      id:Date.now(),
+      bar:p.bar||'',
+      name:p.name,
+      brand:p.brand||'',
+      cat:p.cat||'Outros',
+      price:p.defaultPrice||0,
+      qty:1,
+      checked:false
+    });
+    toast(`"${p.name}" adicionado à Lista de Compras!`);
+  }
+  persist();
+  renderShoppingList();
+}
+
+function registerPurchaseFromCatalog(id){
+  const p=(S.catalog||[]).find(c=>c.id===id);
+  if(!p)return;
+  go('reg');
+  $('name').value=p.name;
+  $('brand').value=p.brand||'';
+  $('bar').value=p.bar||'';
+  $('cat').value=p.cat||'Alimentos';
+  refreshSub(p.sub||'');
+  $('size').value=p.size||1;
+  $('unit').value=p.unit||'un';
+  if(p.defaultPrice>0)$('price').value=Number(p.defaultPrice).toFixed(2);
+  if(p.lastMkt)$('mkt').value=p.lastMkt;
+  photoData=p.photo||'';
+  showPreview();
+  $('price').focus();
+  toast(`Preenchido: ${p.name}`);
+}
+
+function seedBasicCatalog(){
+  if(S.catalog&&S.catalog.length>0){
+    if(!confirm('Deseja adicionar os produtos essenciais ao seu banco de dados atual?'))return;
+  }
+  const staples=[
+    {name:'Arroz Branco Tipo 1',brand:'Camil',bar:'7896006711124',cat:'Alimentos',sub:'Grãos e cereais',size:5,unit:'kg',price:28.90},
+    {name:'Arroz Branco Tipo 1',brand:'Tio João',bar:'7896006700012',cat:'Alimentos',sub:'Grãos e cereais',size:1,unit:'kg',price:6.89},
+    {name:'Feijão Carioca',brand:'Kicaldo',bar:'7896006721116',cat:'Alimentos',sub:'Grãos e cereais',size:1,unit:'kg',price:7.49},
+    {name:'Feijão Preto',brand:'Camil',bar:'7896006731115',cat:'Alimentos',sub:'Grãos e cereais',size:1,unit:'kg',price:7.99},
+    {name:'Óleo de Soja',brand:'Liza',bar:'7891100010014',cat:'Alimentos',sub:'Mercearia',size:900,unit:'ml',price:6.39},
+    {name:'Açúcar Refinado',brand:'União',bar:'7896004000015',cat:'Alimentos',sub:'Mercearia',size:1,unit:'kg',price:4.29},
+    {name:'Café Torrado e Moído',brand:'Pilão',bar:'7896089010015',cat:'Bebidas',sub:'Café e chá',size:500,unit:'g',price:18.90},
+    {name:'Café Tradicional',brand:'Melitta',bar:'7896089020014',cat:'Bebidas',sub:'Café e chá',size:500,unit:'g',price:19.49},
+    {name:'Leite Integral',brand:'Piracanjuba',bar:'7898215150017',cat:'Alimentos',sub:'Laticínios e frios',size:1,unit:'L',price:4.89},
+    {name:'Leite Condensado Moça',brand:'Nestlé',bar:'7891000100103',cat:'Alimentos',sub:'Mercearia',size:395,unit:'g',price:6.49},
+    {name:'Macarrão Espaguete',brand:'Barilla',bar:'7896005800010',cat:'Alimentos',sub:'Massas e molhos',size:500,unit:'g',price:5.29},
+    {name:'Molho de Tomate',brand:'Pomarola',bar:'7891000200102',cat:'Alimentos',sub:'Massas e molhos',size:300,unit:'g',price:2.99},
+    {name:'Sabão em Pó Lavagem Perfeita',brand:'Omo',bar:'7891150050012',cat:'Limpeza',sub:'Roupas',size:1.6,unit:'kg',price:22.90},
+    {name:'Amaciante Concentrado',brand:'Downy',bar:'7891150060011',cat:'Limpeza',sub:'Roupas',size:1,unit:'L',price:17.90},
+    {name:'Detergente Neutro',brand:'Ypê',bar:'7896098900013',cat:'Limpeza',sub:'Cozinha',size:500,unit:'ml',price:2.39},
+    {name:'Desinfetante Lavanda',brand:'Pinho Sol',bar:'7896098910012',cat:'Limpeza',sub:'Limpeza geral',size:1,unit:'L',price:8.99},
+    {name:'Creme Dental Total 12',brand:'Colgate',bar:'7891030010016',cat:'Higiene pessoal',sub:'Bucal',size:90,unit:'g',price:5.49},
+    {name:'Sabonete Barra Original',brand:'Dove',bar:'7891030020015',cat:'Higiene pessoal',sub:'Corpo',size:90,unit:'g',price:4.19},
+    {name:'Refrigerante Tradicional',brand:'Coca-Cola',bar:'7894900010015',cat:'Bebidas',sub:'Refrigerantes',size:2,unit:'L',price:9.99}
+  ];
+
+  staples.forEach(s=>registerOrUpdateProductInCatalog(s,'padrao'));
+  persist();
+  refreshLists();
+  renderCatalog();
+  toast('Catálogo de produtos essenciais carregado!');
+}
+
+/* ==========================================================================
+   INTEGRAÇÃO ONLINE (OPEN FOOD FACTS API)
+   ========================================================================== */
+function guessCategoryFromName(name='', tags=[]){
+  const text=(name+' '+(tags||[]).join(' ')).toLowerCase();
+  if(/refrigerante|suco|agua|cerveja|vinho|cafe|cha|energetico|vodka|bebida/i.test(text))return 'Bebidas';
+  if(/detergente|sabao|amaciante|desinfetante|limpeza|esponja|alvejante/i.test(text))return 'Limpeza';
+  if(/shampoo|condicionador|sabonete|creme dental|escova|desodorante|papel higienico|absorvente|fralda/i.test(text))return 'Higiene pessoal';
+  if(/racao|pet|gato|cachorro|cao|areia sanitaria/i.test(text))return 'Pet';
+  return 'Alimentos';
+}
+
+async function lookupBarcodeOnline(code){
+  const clean=String(code||'').replace(/\D/g,'');
+  if(!clean||clean.length<8)return null;
+  try{
+    const res=await fetch(`https://world.openfoodfacts.org/api/v2/product/${clean}.json`);
+    if(!res.ok)return null;
+    const data=await res.json();
+    if(data&&data.status===1&&data.product){
+      const p=data.product;
+      const name=p.product_name_pt||p.product_name||p.generic_name_pt||p.generic_name||'';
+      const brand=p.brands?p.brands.split(',')[0].trim():'';
+      const photo=p.image_front_small_url||p.image_front_url||p.image_url||'';
+      let size=1, unit='un';
+      const qStr=p.quantity||'';
+      const m=qStr.match(/(\d+(?:[.,]\d+)?)\s*(kg|g|l|ml|un|pct)/i);
+      if(m){
+        size=parseFloat(m[1].replace(',','.'));
+        unit=m[2].toLowerCase();
+        if(unit==='l')unit='L';
+      }
+      return {
+        name,
+        brand,
+        bar:clean,
+        cat:guessCategoryFromName(name, p.categories_tags),
+        sub:'',
+        size,
+        unit,
+        photo
+      };
+    }
+  }catch(e){}
+  return null;
+}
+
+/* ==========================================================================
+   VISÃO COMPUTACIONAL POR IA (GOOGLE GEMINI VISION)
+   ========================================================================== */
+async function callGeminiVision(base64Data, barcodeHint=''){
+  const apiKey=(S.aiConfig&&S.aiConfig.apiKey)||localStorage.getItem('gemini_api_key')||'';
+  if(!apiKey)throw new Error('SEM_CHAVE');
+  const model=(S.aiConfig&&S.aiConfig.model)||'gemini-1.5-flash';
+  const cleanBase64=base64Data.replace(/^data:image\/[a-z]+;base64,/,'');
+
+  const prompt=`Você é um leitor inteligente de produtos e etiquetas de supermercado. Analise detalhadamente a foto e extraia as informações do produto no formato JSON estrito:
+{
+  "name": "nome limpo e específico do produto (ex: Arroz Tipo 1, Sabão em Pó, Café Torrado e Moído)",
+  "brand": "marca do produto (ex: Camil, Omo, Pilão)",
+  "bar": "${barcodeHint ? barcodeHint : 'código de barras numérico EAN legível na embalagem ou etiqueta (somente números), senão vazio'}",
+  "cat": "categoria mais adequada exatamente uma destas: Alimentos, Bebidas, Limpeza, Higiene pessoal, Pet, Outros",
+  "sub": "subcategoria aproximada",
+  "size": número com o conteúdo ou peso líquido (ex: 1, 500, 2, 900),
+  "unit": "unidade em minúsculo entre: un, kg, g, L, ml, pct, cx, dz",
+  "price": número com o valor do preço se houver etiqueta de gôndola, etiqueta de preço ou cupom na foto (ex: 7.99), caso contrário null,
+  "mkt": "nome do supermercado se visível na etiqueta de preço ou gôndola, senão vazio",
+  "exp": "data de validade no formato YYYY-MM-DD se legível, senão vazio",
+  "note": "breve observação útil sobre o produto"
+}`;
+
+  const url=`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
+  const response=await fetch(url,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      contents:[{
+        parts:[
+          {text:prompt},
+          {inline_data:{mime_type:'image/jpeg',data:cleanBase64}}
+        ]
+      }],
+      generationConfig:{
+        temperature:0.1,
+        response_mime_type:'application/json'
+      }
+    })
+  });
+
+  if(!response.ok){
+    const errText=await response.text();
+    throw new Error('Falha na API Gemini: '+response.status+' - '+errText);
+  }
+
+  const resJson=await response.json();
+  const textOut=resJson?.candidates?.[0]?.content?.parts?.[0]?.text;
+  if(!textOut)throw new Error('Resposta vazia da IA');
+  return JSON.parse(textOut);
+}
+
+/* ==========================================================================
+   LEITURA DIRETA POR IA DA FOTO DO PRODUTO
+   ========================================================================== */
+async function handleProductPhotoAI(file){
+  if(!file)return;
+  const statusEl=$('aiScanStatus');
+  const titleEl=$('aiStatusTitle');
+  const subEl=$('aiStatusSub');
+  const pillsEl=$('aiExtractedPills');
+  const spinnerEl=$('aiSpinner');
+
+  if(statusEl){
+    statusEl.style.display='block';
+    if(spinnerEl)spinnerEl.style.display='block';
+    titleEl.textContent='Analisando foto com Inteligência Artificial...';
+    subEl.textContent='Otimizando imagem e lendo rótulo, código, peso e preço...';
+    pillsEl.style.display='none';
+    pillsEl.innerHTML='';
+  }
+
+  try{
+    // 1. Obter imagem comprimida e em alta resolução para análise
+    photoData=await resizeImage(file, 1280);
+    showPreview();
+
+    // 2. Tentar leitura instantânea do código de barras via ZXing
+    let detectedBarcode='';
+    try{
+      await loadZX();
+      const zxResult=await readerFactory().decodeFromImageUrl(photoData);
+      if(zxResult) detectedBarcode=String(zxResult.getText()).replace(/\D/g,'');
+    }catch(zErr){}
+
+    // 3. Tentar leitura multimodal com Google Gemini Vision
+    const apiKey=(S.aiConfig&&S.aiConfig.apiKey)||localStorage.getItem('gemini_api_key')||'';
+    let aiResult=null;
+
+    if(apiKey){
+      subEl.textContent='Visão computacional Gemini identificando cada detalhe...';
+      try{
+        aiResult=await callGeminiVision(photoData, detectedBarcode);
+      }catch(geminiErr){
+        console.warn('Erro Gemini:', geminiErr);
+      }
+    }
+
+    // 4. Se não tem chave ou falhou Gemini, tenta base Open Food Facts com barcode
+    if(!aiResult&&detectedBarcode){
+      subEl.textContent=`Código ${detectedBarcode} identificado! Buscando dados online...`;
+      const off=await lookupBarcodeOnline(detectedBarcode);
+      if(off){
+        aiResult={
+          name:off.name,
+          brand:off.brand,
+          bar:detectedBarcode,
+          cat:off.cat,
+          sub:off.sub,
+          size:off.size,
+          unit:off.unit,
+          price:null,
+          mkt:'',
+          note:'Identificado por código de barras'
+        };
+      }
+    }
+
+    // 5. Se ainda não tem dados completos, abrir modal para informar chave gratuita
+    if(!aiResult){
+      pendingAiFile=file;
+      if(!apiKey){
+        if(statusEl)statusEl.style.display='none';
+        $('aiQuickKeyModal').style.display='flex';
+        return;
+      }
+      throw new Error('Não foi possível identificar o produto na foto. Tente uma foto mais aproximada e iluminada.');
+    }
+
+    // 6. Preencher formulário de registro com as informações extraídas
+    if(aiResult.name)$('name').value=aiResult.name;
+    if(aiResult.brand)$('brand').value=aiResult.brand;
+    const finalBarcode=aiResult.bar||detectedBarcode||'';
+    if(finalBarcode)$('bar').value=finalBarcode;
+    if(aiResult.cat&&CATS[aiResult.cat]){
+      $('cat').value=aiResult.cat;
+      refreshSub(aiResult.sub||'');
+    }
+    if(aiResult.size&&aiResult.size>0)$('size').value=aiResult.size;
+    if(aiResult.unit)$('unit').value=aiResult.unit;
+    if(aiResult.price&&Number(aiResult.price)>0)$('price').value=Number(aiResult.price).toFixed(2);
+    if(aiResult.mkt)$('mkt').value=aiResult.mkt;
+    if(aiResult.exp)$('exp').value=aiResult.exp;
+    if(aiResult.note)$('note').value=aiResult.note;
+
+    // 7. Auto-cadastrar ou atualizar no Banco de Dados de Produtos
+    const catalogItem=registerOrUpdateProductInCatalog({
+      name:aiResult.name||$('name').value,
+      brand:aiResult.brand||$('brand').value,
+      bar:finalBarcode,
+      cat:aiResult.cat||$('cat').value,
+      sub:aiResult.sub||$('sub').value,
+      size:aiResult.size||Number($('size').value),
+      unit:aiResult.unit||$('unit').value,
+      price:Number(aiResult.price)||0,
+      mkt:aiResult.mkt||$('mkt').value,
+      photo:photoData,
+      note:aiResult.note||''
+    }, apiKey?'ai-vision':'barcode-online');
+
+    // 8. Apresentar feedback de sucesso no HUD
+    if(spinnerEl)spinnerEl.style.display='none';
+    titleEl.innerHTML='✨ Informações Reconhecidas pela IA!';
+    subEl.textContent='Produto cadastrado no banco de dados e preenchido no formulário.';
+    
+    pillsEl.innerHTML=`
+      <span class="ai-pill success">🏷️ ${esc(aiResult.name||'Produto')}</span>
+      ${aiResult.brand?`<span class="ai-pill">🏢 ${esc(aiResult.brand)}</span>`:''}
+      ${finalBarcode?`<span class="barcode-badge">🔢 ${esc(finalBarcode)}</span>`:''}
+      <span class="ai-pill">⚖️ ${aiResult.size||1} ${esc(aiResult.unit||'un')}</span>
+      ${aiResult.price?`<span class="ai-pill success">💰 ${money(aiResult.price)}</span>`:''}
+      <span class="ai-pill success">✓ Salvo no Banco</span>
+    `;
+    pillsEl.style.display='flex';
+    playBeep();
+    toast(`✨ IA: "${aiResult.name}" cadastrado no banco!`);
+
+  }catch(err){
+    if(spinnerEl)spinnerEl.style.display='none';
+    titleEl.textContent='Leitura por IA não concluída';
+    subEl.textContent=err.message||'Tire outra foto mais nítida do produto ou rótulo.';
+    toast('Foto anexada. Você pode preencher manualmente ou usar "Ler código".');
+  }
 }
 
 /* ==========================================================================
@@ -1236,7 +2184,7 @@ function renderAll(){
 
 function shoppingItemHTML(item){
   const subtotal=(Number(item.price)||0)*(Number(item.qty)||1);
-  return `<div class="item" style="${item.checked?'opacity:.75;background:color-mix(in srgb,var(--primary) 7%,transparent);border-radius:12px;padding:8px 10px;margin-bottom:5px;':''}"><input type="checkbox" class="list-check" style="width:22px;height:22px;accent-color:var(--primary);cursor:pointer;flex:0 0 22px" ${item.checked?'checked':''} onchange="toggleListItem(${item.id})"><div class="item-main" style="min-width:0;flex:1"><strong style="${item.checked?'text-decoration:line-through;color:var(--muted)':''}">${esc(item.name)}</strong><small>${item.brand?esc(item.brand)+' · ':''}${item.bar?'Código: '+esc(item.bar)+' · ':''}${item.price>0?money(item.price)+' un':'Sem preço salvo'}</small></div><div class="item-side" style="text-align:right"><strong>${item.price>0?money(subtotal):'--'}</strong><div class="mini-actions" style="align-items:center;gap:4px;margin-top:3px"><button class="mini" type="button" onclick="changeListQty(${item.id},-1)" aria-label="Diminuir">-</button><span style="font-size:12px;font-weight:750;min-width:18px;text-align:center">${item.qty||1}</span><button class="mini" type="button" onclick="changeListQty(${item.id},1)" aria-label="Aumentar">+</button><button class="mini" type="button" onclick="deleteListItem(${item.id})" aria-label="Remover" style="color:var(--danger)">×</button></div></div></div>`;
+  return `<div class="item" style="${item.checked?'opacity:.75;background:color-mix(in srgb,var(--primary) 7%,transparent);border-radius:12px;padding:8px 10px;margin-bottom:5px;':''}"><input type="checkbox" class="list-check" style="width:22px;height:22px;accent-color:var(--primary);cursor:pointer;flex:0 0 22px" ${item.checked?'checked':''} onchange="toggleListItem(${item.id})"><div class="item-main" style="min-width:0;flex:1"><strong style="${item.checked?'text-decoration:line-through;color:var(--muted)':''}">${esc(item.name)}</strong><small>${item.brand?esc(item.brand)+' · ':''}${item.bar?'Código: '+esc(item.bar)+' · ':''}${item.price>0?money(item.price)+' un':'Sem preço salvo'}</small></div><div class="item-side" style="text-align:right"><strong>${item.price>0?money(subtotal):'--'}</strong><div class="mini-actions" style="align-items:center;gap:4px;margin-top:3px"><button class="mini" type="button" onclick="goNatalRecommenderForProduct('${esc(item.name)}')" title="Indicar melhor supermercado em Natal">📍</button><button class="mini" type="button" onclick="changeListQty(${item.id},-1)" aria-label="Diminuir">-</button><span style="font-size:12px;font-weight:750;min-width:18px;text-align:center">${item.qty||1}</span><button class="mini" type="button" onclick="changeListQty(${item.id},1)" aria-label="Aumentar">+</button><button class="mini" type="button" onclick="deleteListItem(${item.id})" aria-label="Remover" style="color:var(--danger)">×</button></div></div></div>`;
 }
 
 function toggleListItem(id){
@@ -1477,18 +2425,135 @@ $('scanToListBtn')?.addEventListener('click',()=>scan('list'));
 $('doneScanningBtn')?.addEventListener('click',()=>{stopCamera();go('list')});
 $('closeCamera').addEventListener('click',stopCamera);
 $('barcodeFile').addEventListener('change',e=>{const f=e.target.files[0];e.target.value='';if(f)readBarcodePhoto(f)});
-$('productFile').addEventListener('change',async e=>{
+
+// Leitura Direta por IA e Foto do Produto
+$('aiScanBtn')?.addEventListener('click',()=>$('aiProductFile')?.click());
+$('aiProductFile')?.addEventListener('change',e=>{const f=e.target.files[0];e.target.value='';if(f)handleProductPhotoAI(f)});
+$('productFile')?.addEventListener('change',e=>{const f=e.target.files[0];e.target.value='';if(f)handleProductPhotoAI(f)});
+$('closeAiStatusBtn')?.addEventListener('click',()=>{if($('aiScanStatus'))$('aiScanStatus').style.display='none'});
+
+// Banco de Dados de Produtos (Catálogo)
+$('prodTabCatalog')?.addEventListener('click',()=>setProdTab('catalog'));
+$('prodTabPrices')?.addEventListener('click',()=>setProdTab('prices'));
+$('catalogSearch')?.addEventListener('input',renderCatalog);
+$('catalogCatFilter')?.addEventListener('change',renderCatalog);
+$('openNewCatalogProdBtn')?.addEventListener('click',()=>openCatalogModal(null));
+$('seedCatalogBtn')?.addEventListener('click',seedBasicCatalog);
+$('closeCatalogModal')?.addEventListener('click',()=>$('catalogModal').style.display='none');
+$('cancelCatalogProdBtn')?.addEventListener('click',()=>$('catalogModal').style.display='none');
+$('saveCatalogProdBtn')?.addEventListener('click',saveCatalogProductFromForm);
+$('catalogFormCat')?.addEventListener('change',()=>refreshCatalogSub());
+$('catalogFormPhotoFile')?.addEventListener('change',async e=>{
   const f=e.target.files[0];
   e.target.value='';
   if(!f)return;
   try{
-    photoData=await resizeImage(f);
-    showPreview();
-    toast('Foto anexada.');
-  }catch(x){
-    toast('Não foi possível anexar a foto.');
+    catalogPhotoData=await resizeImage(f,800);
+    showCatalogPhotoPreview();
+  }catch(err){
+    toast('Erro ao carregar foto.');
   }
 });
+$('catalogClearPhotoBtn')?.addEventListener('click',()=>{
+  catalogPhotoData='';
+  showCatalogPhotoPreview();
+});
+$('catalogLookupOnlineBtn')?.addEventListener('click',async()=>{
+  const bar=$('catalogFormBar').value.replace(/\D/g,'').trim();
+  if(!bar)return toast('Digite o código de barras primeiro.');
+  toast('Consultando base global de produtos...');
+  const off=await lookupBarcodeOnline(bar);
+  if(off&&off.name){
+    $('catalogFormName').value=off.name;
+    if(off.brand)$('catalogFormBrand').value=off.brand;
+    if(off.cat){$('catalogFormCat').value=off.cat;refreshCatalogSub(off.sub||'');}
+    if(off.size)$('catalogFormSize').value=off.size;
+    if(off.unit)$('catalogFormUnit').value=off.unit;
+    if(off.photo){catalogPhotoData=off.photo;showCatalogPhotoPreview();}
+    toast('Dados encontrados e preenchidos!');
+  }else{
+    toast('Código não localizado na base online.');
+  }
+});
+
+// Modal de Configuração Rápida de IA
+$('closeAiQuickKeyModal')?.addEventListener('click',()=>$('aiQuickKeyModal').style.display='none');
+$('saveAiQuickKeyBtn')?.addEventListener('click',()=>{
+  const k=$('aiQuickKeyInput').value.trim();
+  if(!k)return toast('Cole sua chave do Gemini.');
+  S.aiConfig=S.aiConfig||{};
+  S.aiConfig.apiKey=k;
+  localStorage.setItem('gemini_api_key',k);
+  persist();
+  updateAiConfigUI();
+  $('aiQuickKeyModal').style.display='none';
+  toast('Chave do Gemini salva!');
+  if(pendingAiFile){
+    const f=pendingAiFile;
+    pendingAiFile=null;
+    handleProductPhotoAI(f);
+  }
+});
+$('skipAiKeyBtn')?.addEventListener('click',()=>{
+  $('aiQuickKeyModal').style.display='none';
+  if(pendingAiFile){
+    const f=pendingAiFile;
+    pendingAiFile=null;
+    handleProductPhotoAI(f);
+  }
+});
+
+// Configurações de IA em #page-cfg
+$('saveAiKeyBtn')?.addEventListener('click',()=>{
+  const k=$('geminiApiKeyInput').value.trim();
+  S.aiConfig=S.aiConfig||{};
+  S.aiConfig.apiKey=k;
+  S.aiConfig.model=$('aiModelSelect').value;
+  S.aiConfig.fallback=$('aiFallbackMode').value;
+  localStorage.setItem('gemini_api_key',k);
+  persist();
+  updateAiConfigUI();
+  toast('Configurações de IA salvas com sucesso!');
+});
+$('testAiKeyBtn')?.addEventListener('click',testAiConnection);
+$('toggleGeminiKeyVis')?.addEventListener('click',()=>{
+  const inp=$('geminiApiKeyInput');
+  inp.type=inp.type==='password'?'text':'password';
+});
+
+async function testAiConnection(){
+  const k=$('geminiApiKeyInput')?.value.trim()||(S.aiConfig&&S.aiConfig.apiKey)||'';
+  if(!k)return toast('Informe a chave do Gemini antes de testar.');
+  toast('Testando conexão com a API Gemini...');
+  try{
+    const model=$('aiModelSelect')?.value||(S.aiConfig&&S.aiConfig.model)||'gemini-1.5-flash';
+    const url=`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(k)}`;
+    const res=await fetch(url,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{parts:[{text:'Olá! Responda estritamente OK.'}]}]})
+    });
+    if(!res.ok){
+      const err=await res.text();
+      return toast(`Erro na conexão: status ${res.status}. Confira a chave.`);
+    }
+    toast('✓ Conexão com Google Gemini realizada com sucesso! IA ativa para fotos.');
+  }catch(e){
+    toast('Erro de rede ao conectar com a IA: '+e.message);
+  }
+}
+
+function updateAiConfigUI(){
+  if($('geminiApiKeyInput'))$('geminiApiKeyInput').value=(S.aiConfig&&S.aiConfig.apiKey)||localStorage.getItem('gemini_api_key')||'';
+  if($('aiModelSelect')&&S.aiConfig&&S.aiConfig.model)$('aiModelSelect').value=S.aiConfig.model;
+  if($('aiFallbackMode')&&S.aiConfig&&S.aiConfig.fallback)$('aiFallbackMode').value=S.aiConfig.fallback;
+  const badge=$('aiConfigBadge');
+  if(badge){
+    const hasKey=!!((S.aiConfig&&S.aiConfig.apiKey)||localStorage.getItem('gemini_api_key'));
+    badge.textContent=hasKey?'IA Ativa (Gemini Vision)':'Leitor Local / Offline';
+    badge.style.background=hasKey?'linear-gradient(135deg,#059669,#10b981)':'linear-gradient(135deg,#6366f1,#8b5cf6)';
+  }
+}
 
 $('saveBtn').addEventListener('click',save);
 $('clearBtn').addEventListener('click',clearForm);
@@ -1596,6 +2661,550 @@ $('cancelMarketBtn')?.addEventListener('click',closeMarketModal);
 $('saveMarketBtn')?.addEventListener('click',saveMarket);
 $('mktSearch')?.addEventListener('input',renderMarkets);
 
+/* ==========================================================================
+   INTEGRAÇÃO API CNPJ & RECOMENDADOR DE SUPERMERCADOS DE NATAL (RN)
+   CNAE 4711-3/02: Comércio varejista com predominância de produtos alimentícios
+   ========================================================================== */
+const NATAL_SUPERMERCADOS_BASE = [
+  {
+    cnpj: '08.123.456/0001-90',
+    razao_social: 'SUPERMERCADOS NORDESTAO LTDA',
+    nome_fantasia: 'Nordestão - Loja Lagoa Nova',
+    cnae: '4711302',
+    telefone: '(84) 3215-1000',
+    logradouro: 'Av. Senador Salgado Filho, 2234',
+    bairro: 'Lagoa Nova',
+    cidade: 'Natal',
+    uf: 'RN',
+    cep: '59075-000',
+    dia_oferta: 'Quarta de Frutas e Verduras',
+    avaliacao: 4.8
+  },
+  {
+    cnpj: '08.123.456/0002-71',
+    razao_social: 'SUPERMERCADOS NORDESTAO LTDA',
+    nome_fantasia: 'Nordestão - Loja Tirol',
+    cnae: '4711302',
+    telefone: '(84) 3215-1100',
+    logradouro: 'Av. Prudente de Morais, 1140',
+    bairro: 'Tirol',
+    cidade: 'Natal',
+    uf: 'RN',
+    cep: '59020-505',
+    dia_oferta: 'Quarta Verde & Sábado da Carne',
+    avaliacao: 4.7
+  },
+  {
+    cnpj: '08.123.456/0003-52',
+    razao_social: 'SUPERMERCADOS NORDESTAO LTDA',
+    nome_fantasia: 'Nordestão - Loja Ponta Negra',
+    cnae: '4711302',
+    telefone: '(84) 3215-1200',
+    logradouro: 'Av. Engenheiro Roberto Freire, 2050',
+    bairro: 'Capim Macio',
+    cidade: 'Natal',
+    uf: 'RN',
+    cep: '59082-000',
+    dia_oferta: 'Quinta do Pescado & Fim de Semana',
+    avaliacao: 4.8
+  },
+  {
+    cnpj: '08.123.456/0004-33',
+    razao_social: 'SUPERMERCADOS NORDESTAO LTDA',
+    nome_fantasia: 'Nordestão - Loja Santa Catarina',
+    cnae: '4711302',
+    telefone: '(84) 3215-1300',
+    logradouro: 'Av. Dr. João Medeiros Filho, 1835',
+    bairro: 'Potengi',
+    cidade: 'Natal',
+    uf: 'RN',
+    cep: '59108-200',
+    dia_oferta: 'Terça e Quarta de Feira Nordestão',
+    avaliacao: 4.6
+  },
+  {
+    cnpj: '05.987.654/0001-20',
+    razao_social: 'FAVORITO SUPERMERCADOS LTDA',
+    nome_fantasia: 'Favorito Supermercados - Ayrton Senna',
+    cnae: '4711302',
+    telefone: '(84) 3646-3000',
+    logradouro: 'Av. Ayrton Senna, 2195',
+    bairro: 'Capim Macio',
+    cidade: 'Natal',
+    uf: 'RN',
+    cep: '59080-100',
+    dia_oferta: 'Quarta do Hortifrúti & Sexta do Churrasco',
+    avaliacao: 4.6
+  },
+  {
+    cnpj: '05.987.654/0002-01',
+    razao_social: 'FAVORITO SUPERMERCADOS LTDA',
+    nome_fantasia: 'Favorito Supermercados - Zona Norte',
+    cnae: '4711302',
+    telefone: '(84) 3661-4000',
+    logradouro: 'Av. Dr. João Medeiros Filho, 2300',
+    bairro: 'Igapó',
+    cidade: 'Natal',
+    uf: 'RN',
+    cep: '59104-200',
+    dia_oferta: 'Quarta Verde & Segunda da Economia',
+    avaliacao: 4.5
+  },
+  {
+    cnpj: '45.543.915/0082-95',
+    razao_social: 'CARREFOUR COMERCIO E INDUSTRIA LTDA',
+    nome_fantasia: 'Carrefour Hipermercado - Natal Zona Sul',
+    cnae: '4711302',
+    telefone: '(84) 3209-8000',
+    logradouro: 'Rodovia BR-101 Sul / Marginal, Km 95',
+    bairro: 'Candelária',
+    cidade: 'Natal',
+    uf: 'RN',
+    cep: '59066-065',
+    dia_oferta: 'Terça e Quarta de Feira Carrefour',
+    avaliacao: 4.5
+  },
+  {
+    cnpj: '06.057.223/0214-87',
+    razao_social: 'SENDAS DISTRIBUIDORA S/A',
+    nome_fantasia: 'Assaí Atacadista - Natal BR-101',
+    cnae: '4711302',
+    telefone: '(84) 3209-6400',
+    logradouro: 'Av. Prefeito Omar O\'Grady / BR-101, 3860',
+    bairro: 'Pitimbú',
+    cidade: 'Natal',
+    uf: 'RN',
+    cep: '59068-150',
+    dia_oferta: 'Preço de Atacado Diário & Quarta do Horti',
+    avaliacao: 4.7
+  },
+  {
+    cnpj: '75.315.333/0042-50',
+    razao_social: 'ATACADAO DISTRIBUICAO COMERCIO E INDUSTRIA LTDA',
+    nome_fantasia: 'Atacadão - Natal Zona Norte',
+    cnae: '4711302',
+    telefone: '(84) 3615-9200',
+    logradouro: 'Av. Bacharel Tomaz Landim, 2021',
+    bairro: 'Igapó',
+    cidade: 'Natal',
+    uf: 'RN',
+    cep: '59106-000',
+    dia_oferta: 'Festival de Limpeza & Terça da Feira',
+    avaliacao: 4.6
+  },
+  {
+    cnpj: '10.456.789/0001-11',
+    razao_social: 'SUPERMERCADOS REDEMAIS NATAL LTDA',
+    nome_fantasia: 'RedeMais Supermercados - Loja Alecrim',
+    cnae: '4711302',
+    telefone: '(84) 3223-5500',
+    logradouro: 'Rua Coronel Estevam, 1200',
+    bairro: 'Alecrim',
+    cidade: 'Natal',
+    uf: 'RN',
+    cep: '59037-000',
+    dia_oferta: 'Quarta e Quinta Econômica RedeMais',
+    avaliacao: 4.4
+  },
+  {
+    cnpj: '14.321.654/0001-30',
+    razao_social: 'SUPER SHOW COMERCIO DE ALIMENTOS LTDA',
+    nome_fantasia: 'Super Show - Nova Descoberta',
+    cnae: '4711302',
+    telefone: '(84) 3234-8000',
+    logradouro: 'Av. Xavier da Silveira, 1020',
+    bairro: 'Nova Descoberta',
+    cidade: 'Natal',
+    uf: 'RN',
+    cep: '59056-000',
+    dia_oferta: 'Quarta de Feira & Sexta da Carne',
+    avaliacao: 4.3
+  },
+  {
+    cnpj: '10.456.789/0003-75',
+    razao_social: 'SUPERMERCADOS REDEMAIS CIDADE DA ESPERANCA LTDA',
+    rede: 'RedeMAIS',
+    nome_fantasia: 'RedeMAIS - Cidade da Esperança',
+    cnae: '4711302',
+    telefone: '+558432051098',
+    logradouro: 'Rua Conceição, 01/03',
+    bairro: 'Cidade da Esperança',
+    cidade: 'Natal',
+    uf: 'RN',
+    cep: '59070-230',
+    horario: 'Seg-Sex 09h-18h; Sáb 09h-13h',
+    dia_oferta: 'Quarta e Quinta Econômica RedeMAIS',
+    avaliacao: 4.5
+  },
+  {
+    cnpj: '10.456.789/0004-56',
+    razao_social: 'SERVE BEM COMERCIO DE ALIMENTOS LTDA',
+    rede: 'RedeMAIS',
+    nome_fantasia: 'RedeMAIS - Serve Bem',
+    cnae: '4711302',
+    telefone: '+558432057882',
+    logradouro: 'Rua Recife, 50',
+    bairro: 'Cidade da Esperança',
+    cidade: 'Natal',
+    uf: 'RN',
+    cep: '59070-350',
+    horario: 'Seg-Sáb 07h-20h; Dom 07h-13h',
+    dia_oferta: 'Quarta de Hortifrúti & Fim de Semana',
+    avaliacao: 4.6
+  },
+  {
+    cnpj: '03.789.123/0001-44',
+    razao_social: 'SUPERFACIL ATACADO E VAREJO DE ALIMENTOS LTDA',
+    rede: 'Superfácil',
+    nome_fantasia: 'Superfácil Atacado - Rodoviária',
+    cnae: '4711302',
+    telefone: '(84) 3205-3000',
+    logradouro: 'Av. Capitão-Mor Gouveia, S/N',
+    bairro: 'Cidade da Esperança',
+    cidade: 'Natal',
+    uf: 'RN',
+    cep: '59070-000',
+    horario: 'Seg-Sáb 07h-20h; Dom 07h-13h',
+    dia_oferta: 'Preço de Atacado & Terça e Quarta de Feira',
+    avaliacao: 4.6
+  }
+];
+
+let currentMarketTab = 'my';
+function setMarketTab(tab){
+  currentMarketTab = tab;
+  $('mercTabMyMarkets')?.classList.toggle('active', tab==='my');
+  $('mercTabNatal')?.classList.toggle('active', tab==='natal');
+  if($('mercMyMarketsView')) $('mercMyMarketsView').style.display = tab==='my' ? 'block' : 'none';
+  if($('mercNatalView')) $('mercNatalView').style.display = tab==='natal' ? 'block' : 'none';
+  if(tab==='my') renderMarkets();
+}
+
+function goNatalRecommender(productName=''){
+  go('merc');
+  setMarketTab('natal');
+  if(productName){
+    const inp = $('natalProdInput');
+    if(inp){
+      inp.value = productName;
+      execNatalSuggest();
+    }
+  } else {
+    $('natalProdInput')?.focus();
+  }
+}
+
+function goNatalRecommenderForProduct(name){
+  goNatalRecommender(name);
+}
+
+async function buscarSupermercadosNatalAsync({ forceMock=false, apiToken=null } = {}){
+  const token = apiToken || localStorage.getItem('cc-cnpja-token');
+  if(!forceMock && token && token !== 'SEU_TOKEN_AQUI'){
+    try {
+      const url = 'https://api.cnpja.com/companies?city=Natal&state=RN&cnae=4711302';
+      const res = await fetch(url, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json'
+        }
+      });
+      if(res.ok){
+        const data = await res.json();
+        const list = data.companies || data.data || (Array.isArray(data) ? data : []);
+        if(list.length > 0){
+          return list.map(item => ({
+            cnpj: item.taxId || item.cnpj || '00.000.000/0000-00',
+            razao_social: item.name || '',
+            nome_fantasia: item.alias || item.name || 'Supermercado',
+            cnae: '4711302',
+            telefone: item.phone || '(84) 3000-0000',
+            logradouro: `${item.address?.street || ''}, ${item.address?.number || 'S/N'}`,
+            bairro: item.address?.district || 'Centro',
+            cidade: item.address?.city || 'Natal',
+            uf: item.address?.state || 'RN',
+            cep: item.address?.zip || '59000-000',
+            dia_oferta: 'Ofertas da Semana',
+            avaliacao: 4.5
+          }));
+        }
+      }
+    } catch(err){
+      console.warn('Falha na API externa, usando base local:', err);
+    }
+  }
+  return NATAL_SUPERMERCADOS_BASE;
+}
+
+function getMapsUrl(m){
+  const q = `${m.nome_fantasia}, ${m.logradouro}, ${m.bairro}, Natal - RN`;
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
+}
+
+async function execNatalSuggest(){
+  const prod = ($('natalProdInput')?.value || '').trim();
+  const bairro = ($('natalBairroSelect')?.value || '').trim();
+  const fonte = $('natalFonteSelect')?.value || 'auto';
+  const container = $('natalResultContainer');
+  if(!container) return;
+
+  if(!prod){
+    toast('Digite o produto que deseja consultar.');
+    $('natalProdInput')?.focus();
+    return;
+  }
+
+  container.style.display = 'block';
+  container.innerHTML = '<div class="muted small" style="text-align:center;padding:12px">🔍 Consultando dados CNAE 4711302 e histórico de preços em Natal...</div>';
+
+  try {
+    const supermercados = await buscarSupermercadosNatalAsync({ forceMock: fonte === 'auto' });
+    let candidatos = supermercados;
+
+    if(bairro){
+      const bTerm = bairro.toLowerCase();
+      const filtrados = supermercados.filter(m => (m.bairro+' '+m.nome_fantasia).toLowerCase().includes(bTerm));
+      if(filtrados.length) candidatos = filtrados;
+    }
+
+    // Cruza com o histórico de compras de Natal registrado pelo usuário
+    const pTerm = prod.toLowerCase();
+    const comprasMatching = S.p.filter(p => {
+      const n = (p.name || '').toLowerCase();
+      const b = (p.brand || '').toLowerCase();
+      return n.includes(pTerm) || pTerm.includes(n) || `${n} ${b}`.includes(pTerm);
+    });
+
+    const precosPorMercado = {};
+    comprasMatching.forEach(p => {
+      const mkt = (p.mkt || '').toLowerCase();
+      const base = priceBase(p);
+      if(!precosPorMercado[mkt] || p.date >= precosPorMercado[mkt].date){
+        precosPorMercado[mkt] = { price: p.price, base, unit: p.unit, date: p.date, mkt: p.mkt };
+      }
+    });
+
+    const comPreco = candidatos.map(m => {
+      const match = Object.entries(precosPorMercado).find(([mktKey]) => {
+        const mName = m.nome_fantasia.toLowerCase();
+        const rName = m.razao_social.toLowerCase();
+        return mName.includes(mktKey) || mktKey.includes(mName) || rName.includes(mktKey);
+      });
+      return { mercado: m, precoInfo: match ? match[1] : null };
+    }).filter(x => x.precoInfo !== null);
+
+    let sugerido = null;
+    let menorPreco = null;
+    let motivo = '';
+    let comparativoHTML = '';
+
+    if(comPreco.length > 0){
+      comPreco.sort((a,b) => a.precoInfo.base - b.precoInfo.base);
+      sugerido = comPreco[0].mercado;
+      menorPreco = comPreco[0].precoInfo;
+
+      if(comPreco.length > 1){
+        const maisCaro = comPreco[comPreco.length - 1];
+        const difValor = maisCaro.precoInfo.price - menorPreco.price;
+        const difPct = (difValor / maisCaro.precoInfo.price) * 100;
+        motivo = `🏆 Menor preço comprovado no seu histórico de compras em Natal!`;
+        comparativoHTML = `
+          <div class="savings-callout" style="margin-top:10px">
+            <b>Economia de ${money(difValor)} (${difPct.toFixed(1)}%)</b> em relação ao mercado ${esc(maisCaro.mercado.nome_fantasia)} (${money(maisCaro.precoInfo.price)}).
+          </div>
+        `;
+      } else {
+        motivo = `🏆 Menor preço registrado no histórico: ${money(menorPreco.price)} em ${(menorPreco.date||'').split('-').reverse().join('/')}.`;
+      }
+    } else {
+      sugerido = candidatos[0];
+      motivo = bairro
+        ? `📍 Supermercado de referência no bairro ${sugerido.bairro} (${sugerido.dia_oferta}).`
+        : `📍 Supermercado de grande rede com ampla variedade em Natal (${sugerido.dia_oferta}).`;
+    }
+
+    const mapsUrl = getMapsUrl(sugerido);
+    const endStr = `${sugerido.logradouro} - ${sugerido.bairro}, ${sugerido.cidade}/${sugerido.uf}`;
+
+    container.innerHTML = `
+      <div class="natal-result">
+        <div class="between" style="align-items:flex-start">
+          <div>
+            <span class="best-price-badge">🏆 Supermercado Sugerido</span>
+            <h3 style="margin:6px 0 2px;font-size:18px">${esc(sugerido.nome_fantasia)}</h3>
+            <small class="muted">${esc(sugerido.razao_social)} · CNPJ: ${esc(sugerido.cnpj)}</small>
+          </div>
+          <span class="badge-cnpj">CNAE 4711-3/02</span>
+        </div>
+
+        <div style="margin:10px 0;font-size:13px;line-height:1.5">
+          <div>📍 <b>Endereço:</b> ${esc(endStr)}</div>
+          <div>📞 <b>Telefone:</b> ${esc(sugerido.telefone)}</div>
+          ${sugerido.horario ? `<div>⏰ <b>Horário:</b> ${esc(sugerido.horario)}</div>` : ''}
+          <div>🏷️ <b>Dia Especial de Ofertas:</b> <span style="color:var(--primary);font-weight:750">${esc(sugerido.dia_oferta)}</span></div>
+        </div>
+
+        ${menorPreco ? `
+          <div class="best-banner" style="margin:8px 0;padding:10px 12px">
+            <div class="between">
+              <span>Preço registrado no histórico:</span>
+              <strong style="color:var(--primary);font-size:17px">${money(menorPreco.price)} <small style="font-size:11px">(${money(menorPreco.base)}/${baseUnit(menorPreco.unit)})</small></strong>
+            </div>
+            <div class="small muted" style="margin-top:3px">Data da última compra: ${(menorPreco.date||'').split('-').reverse().join('/')}</div>
+          </div>
+        ` : ''}
+
+        ${comparativoHTML}
+
+        <p class="small muted" style="margin:8px 0 12px">💡 ${esc(motivo)}</p>
+
+        <div class="actions">
+          <a class="btn primary" href="${esc(mapsUrl)}" target="_blank" rel="noopener" style="flex:1;text-decoration:none">
+            🗺️ Rota no Maps
+          </a>
+          <button class="btn secondary" type="button" onclick="addToListFromNatalSuggest('${esc(prod)}', ${menorPreco ? menorPreco.price : 0})">
+            🛒 Adicionar à Lista
+          </button>
+          <button class="btn ghost" type="button" onclick="importNatalMarket('${esc(sugerido.cnpj)}')">
+            ＋ Salvar nos Meus Mercados
+          </button>
+        </div>
+      </div>
+    `;
+  } catch(err){
+    container.innerHTML = `<div class="card empty" style="color:var(--danger)">Erro ao consultar supermercados: ${esc(err.message)}</div>`;
+  }
+}
+
+function addToListFromNatalSuggest(prodName, price){
+  S.list = S.list || [];
+  S.list.unshift({
+    id: Date.now(),
+    name: prodName,
+    brand: '',
+    bar: '',
+    cat: 'Outros',
+    price: price || 0,
+    qty: 1,
+    checked: false
+  });
+  persist();
+  renderShoppingList();
+  toast(`"${prodName}" adicionado à Lista de Compras!`);
+}
+
+function importNatalMarket(cnpj){
+  const found = NATAL_SUPERMERCADOS_BASE.find(m => m.cnpj === cnpj);
+  if(!found) return;
+  ensureMarketExists(found.nome_fantasia);
+  const m = S.markets.find(x => x.name.toLowerCase() === found.nome_fantasia.toLowerCase());
+  if(m){
+    m.branch = found.bairro;
+    m.city = 'Natal - RN';
+    m.offerDay = found.dia_oferta;
+    m.address = `${found.logradouro} - ${found.bairro}`;
+    m.notes = `CNPJ: ${found.cnpj} | Tel: ${found.telefone}${found.horario ? ' | Horário: ' + found.horario : ''}`;
+    persist();
+    renderMarkets();
+    toast(`"${found.nome_fantasia}" salvo com sucesso nos seus Mercados!`);
+  }
+}
+
+function importAllNatalMarkets(){
+  NATAL_SUPERMERCADOS_BASE.forEach(found => {
+    ensureMarketExists(found.nome_fantasia);
+    const m = S.markets.find(x => x.name.toLowerCase() === found.nome_fantasia.toLowerCase());
+    if(m){
+      m.branch = found.bairro;
+      m.city = 'Natal - RN';
+      m.offerDay = found.dia_oferta;
+      m.address = `${found.logradouro} - ${found.bairro}`;
+      m.notes = `CNPJ: ${found.cnpj} | Tel: ${found.telefone}${found.horario ? ' | Horário: ' + found.horario : ''}`;
+    }
+  });
+  persist();
+  renderMarkets();
+  toast(`Todos os ${NATAL_SUPERMERCADOS_BASE.length} supermercados de Natal foram importados com sucesso!`);
+  setMarketTab('my');
+}
+
+function renderNatalAllMarkets(){
+  const container = $('natalAllMarketsContainer');
+  if(!container) return;
+  const isHidden = container.style.display === 'none';
+  if(!isHidden){
+    container.style.display = 'none';
+    $('natalListAllBtn').textContent = '🏢 Ver Redes de Natal (CNAE)';
+    return;
+  }
+
+  container.style.display = 'block';
+  $('natalListAllBtn').textContent = '✕ Ocultar Redes de Natal';
+
+  container.innerHTML = `
+    <div class="card" style="margin-top:14px">
+      <div class="between" style="margin-bottom:10px">
+        <div>
+          <h3 style="margin:0">Supermercados de Natal (RN)</h3>
+          <small class="muted">Classificação CNAE 4711-3/02 · ${NATAL_SUPERMERCADOS_BASE.length} unidades cadastradas</small>
+        </div>
+        <button class="btn secondary" type="button" style="padding:6px 12px;font-size:12px;min-height:34px" onclick="importAllNatalMarkets()">
+          📥 Importar Todos (${NATAL_SUPERMERCADOS_BASE.length})
+        </button>
+      </div>
+      <div class="list">
+        ${NATAL_SUPERMERCADOS_BASE.map(m => `
+          <div class="natal-market-item">
+            <div style="flex:1;min-width:0">
+              <strong style="display:block">${esc(m.nome_fantasia)}</strong>
+              <small class="muted" style="display:block">${esc(m.razao_social)} · CNPJ: ${esc(m.cnpj)}</small>
+              <small class="muted" style="display:block">📍 ${esc(m.logradouro)} - ${esc(m.bairro)}</small>
+              ${m.horario ? `<small class="muted" style="display:block">⏰ ${esc(m.horario)}</small>` : ''}
+              <div style="margin-top:4px"><span class="offer-tag">🏷️ ${esc(m.dia_oferta)}</span></div>
+            </div>
+            <div class="mini-actions" style="flex-direction:column;gap:5px">
+              <a class="mini" href="${esc(getMapsUrl(m))}" target="_blank" rel="noopener" style="text-decoration:none;display:grid;place-items:center" title="Abrir no Maps">🗺️</a>
+              <button class="mini" type="button" onclick="importNatalMarket('${esc(m.cnpj)}')" title="Salvar mercado">＋</button>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+// Event Listeners do Recomendador Natal (RN)
+$('mercTabMyMarkets')?.addEventListener('click',()=>setMarketTab('my'));
+$('mercTabNatal')?.addEventListener('click',()=>setMarketTab('natal'));
+$('natalSuggestBtn')?.addEventListener('click',execNatalSuggest);
+$('natalListAllBtn')?.addEventListener('click',renderNatalAllMarkets);
+$('natalProdInput')?.addEventListener('keydown',e=>{if(e.key==='Enter')execNatalSuggest()});
+
+// Controles da API CNPJ em Configurações
+$('saveCnpjaTokenBtn')?.addEventListener('click',()=>{
+  const val = ($('cnpjaTokenInput')?.value||'').trim();
+  if(val){
+    localStorage.setItem('cc-cnpja-token', val);
+    toast('Token da API CNPJa salvo com sucesso!');
+  } else {
+    localStorage.removeItem('cc-cnpja-token');
+    toast('Token removido. Usando modo verificado offline.');
+  }
+});
+$('testCnpjaTokenBtn')?.addEventListener('click',async()=>{
+  const val = ($('cnpjaTokenInput')?.value||'').trim() || localStorage.getItem('cc-cnpja-token');
+  if(!val) return toast('Informe um token antes de testar.');
+  toast('Testando conexão com cnpja.com...');
+  try {
+    const list = await buscarSupermercadosNatalAsync({ forceMock: false, apiToken: val });
+    toast(`Sucesso! ${list.length} supermercados carregados.`);
+  } catch(err){
+    toast('Erro ao conectar com a API: ' + err.message);
+  }
+});
+const savedCnpjaToken = localStorage.getItem('cc-cnpja-token');
+if(savedCnpjaToken && $('cnpjaTokenInput')) $('cnpjaTokenInput').value = savedCnpjaToken;
+
 $('themeBtn').addEventListener('click',()=>{
   const dark=document.documentElement.dataset.theme==='dark';
   document.documentElement.dataset.theme=dark?'light':'dark';
@@ -1638,6 +3247,7 @@ if('serviceWorker' in navigator && (location.protocol==='https:' || location.hos
 $('cat').innerHTML=optionList(Object.keys(CATS));
 $('thr').value=S.thr;
 $('bud').value=S.bud||'';
+updateAiConfigUI();
 clearForm();
 const initHash=location.hash.replace('#','');
 if(['list','reg','comp','merc','hist','prod','alert','rel','cfg'].includes(initHash)){

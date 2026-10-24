@@ -38,7 +38,51 @@ O projeto já está preparado com GitHub Actions para publicação automática c
 ## 🛠️ Tecnologias e Recursos
 - **Progressive Web App (PWA)** com Service Worker e cache local.
 - **Funcionamento Offline:** grava e consulta todos os dados no armazenamento local (`localStorage`), sem depender de servidor.
+- **✨ Leitura Direta por IA de Fotos de Produtos:** visão computacional multimodal (Google Gemini Vision: Gemini 1.5/2.0 Flash) que analisa a foto da embalagem, rótulo ou etiqueta de preço e extrai automaticamente nome, marca, peso/conteúdo, unidade, código de barras e preço da gôndola.
+- **📚 Banco de Dados Central de Produtos (Catálogo):** cadastro permanente e detalhado de produtos com fotos, códigos EAN, marcas, categorias e preços de referência, com auto-completar inteligente, consulta à base global Open Food Facts e pré-carregamento de itens essenciais.
 - **Leitor de Código de Barras (EAN/UPC):** suporte à câmera ao vivo e captura por foto em alta resolução com biblioteca ZXing.
 - **🏬 Cadastros de Supermercados Visitados:** gestão de redes, filiais, endereços, dias especiais de feiras/ofertas e acompanhamento de gastos e visitas por mercado.
+- **📍 Recomendador de Supermercados de Natal (RN) - CNAE 4711-3/02:** indicação inteligente de supermercados em Natal para qualquer produto com base no menor preço histórico ou dias de feiras/ofertas nos bairros (Cidade da Esperança, Lagoa Nova, Tirol, Capim Macio, Ponta Negra, Candelária, Alecrim, Zona Norte, etc.), com integração com a API CNPJ (cnpja.com) e catálogo verificado offline de 14 redes.
 - **⚖️ Comparador de Produtos com Melhores Preços:** indicação visual de menores preços (`🏆 Melhor Preço`), cálculo automático de economia (em R$ e %), comparação equivalente por unidade base (R$/kg, R$/L, un), confronto direto entre 2 supermercados e ranking dos mais baratos.
-- **Backup e Exportação:** exportação em CSV para Excel e backup completo em formato JSON.
+- **Backup e Exportação:** exportação em CSV para Excel e backup completo em formato JSON incluindo catálogo de produtos e histórico.
+
+---
+
+## 📍 Módulo Standalone: Sugestão de Supermercados em Natal (RN)
+
+O projeto inclui o módulo ES6+ [`sugestao-supermercado-natal.js`](file:///e:/SistemaDeCompras/ControledeCompras_iPhone_PWA/controle-compras-iphone/sugestao-supermercado-natal.js), pronto para ser executado no Node.js ou importado em outras aplicações:
+
+```bash
+# Indicação de supermercado por produto:
+node sugestao-supermercado-natal.js "Arroz 5kg"
+node sugestao-supermercado-natal.js "Feijão" "Cidade da Esperança"
+
+# Inserção/cadastro dos supermercados de Cidade da Esperança (RedeMAIS & Superfácil):
+node sugestao-supermercado-natal.js --inserir
+```
+
+### Exemplo de uso como módulo em JavaScript:
+```javascript
+import { 
+  indicarSupermercado, 
+  inserirSupermercados, 
+  SUPERMERCADOS_CIDADE_ESPERANCA 
+} from './sugestao-supermercado-natal.js';
+
+// 1. Indicação inteligente no bairro Cidade da Esperança:
+const resultado = await indicarSupermercado({
+  produto: 'Arroz 5kg',
+  bairro: 'Cidade da Esperança' // RedeMAIS / Superfácil
+});
+
+console.log(resultado.supermercado.nome);       // Ex.: RedeMAIS - Cidade da Esperança
+console.log(resultado.supermercado.enderecoFormatado);
+console.log(resultado.motivo);                  // Ex.: Menor preço histórico ou dia de feira
+console.log(resultado.supermercado.mapsUrl);    // Link direto para rota no Google Maps
+
+// 2. Inserção / cadastro via API REST ou banco de dados:
+await inserirSupermercados(SUPERMERCADOS_CIDADE_ESPERANCA, {
+  apiUrl: 'https://sua-api.com/supermercados',
+  apiToken: 'SEU_TOKEN_AQUI'
+});
+```

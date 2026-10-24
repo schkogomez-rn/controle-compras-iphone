@@ -1,8 +1,9 @@
-const CACHE = 'controle-compras-v3';
+const CACHE = 'controle-compras-v5';
 const ASSETS = [
   './',
   './index.html',
   './manifest.webmanifest',
+  './sugestao-supermercado-natal.js',
   './icons/icon-180.png',
   './icons/icon-192.png',
   './icons/icon-512.png',
